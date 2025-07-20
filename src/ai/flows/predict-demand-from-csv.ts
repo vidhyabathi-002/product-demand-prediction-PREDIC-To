@@ -20,10 +20,11 @@ const PredictDemandFromCsvOutputSchema = z.object({
   summary: z.string().describe('A summary of the demand prediction.'),
   predictedUnits: z.number().describe('The predicted number of units to be sold for the entire forecast period.'),
   confidence: z.string().describe('The confidence level of the prediction (e.g., High, Medium, Low).'),
-  forecastData: z.array(z.object({
-    month: z.string().describe("The month for the forecast (e.g., 'Jan', 'Feb')."),
-    units: z.number().describe("The predicted number of units for that month."),
-  })).describe('An array of predicted units for the next 6 months.'),
+  chartData: z.array(z.object({
+    month: z.string().describe("The month for the data point (e.g., 'Jan', 'Feb')."),
+    historical: z.number().describe("The historical sales units for that month. Set to 0 if no historical data is available."),
+    predicted: z.number().describe("The predicted sales units for that month. Set to 0 for historical months."),
+  })).describe('An array of historical and predicted units.'),
 });
 export type PredictDemandFromCsvOutput = z.infer<typeof PredictDemandFromCsvOutputSchema>;
 
@@ -35,9 +36,18 @@ const prompt = ai.definePrompt({
   name: 'predictDemandFromCsvPrompt',
   input: {schema: PredictDemandFromCsvInputSchema},
   output: {schema: PredictDemandFromCsvOutputSchema},
-  prompt: `You are a data scientist specializing in demand forecasting. Analyze the following sales data from a CSV file and predict the future demand for the next six months.
+  prompt: `You are a data scientist specializing in demand forecasting. Analyze the following sales data from a CSV file. The CSV will have 'Month' and 'Sales' columns.
 
-  Provide a concise summary of your findings, the total predicted number of units to be sold over the next 6 months, your confidence level in this prediction, and a monthly breakdown of the forecast.
+  Your tasks are:
+  1. Extract the last 6 months of historical data.
+  2. Predict the future demand for the next six months based on the historical data.
+  3. Provide a concise summary of your findings.
+  4. Provide the total predicted number of units to be sold over the next 6 months.
+  5. Provide your confidence level in this prediction.
+  6. Return a 'chartData' array containing 12 months of data: the last 6 months of historical data and the 6 months of forecasted data.
+    - For historical months, 'historical' should be the sales number and 'predicted' should be 0.
+    - For forecasted months, 'historical' should be 0 and 'predicted' should be the forecasted number.
+    - The final predicted value for the last historical month should also be populated in the 'predicted' field for a smoother graph transition.
 
   CSV Data:
   {{{csvData}}}

@@ -110,7 +110,7 @@ export default function UploadClient() {
       {prediction && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-             {prediction.forecastData && <PredictionChart data={prediction.forecastData} />}
+             {prediction.chartData && <PredictionChart data={prediction.chartData} />}
           </div>
           <div className="lg:col-span-1 flex flex-col gap-6">
             <Card>
@@ -119,7 +119,7 @@ export default function UploadClient() {
                   <BarChart className="h-5 w-5 text-primary" />
                   Prediction Summary
                 </CardTitle>
-              </CardHeader>
+              </Header>
               <CardContent>
                 <p className="text-sm text-muted-foreground">{prediction.summary}</p>
               </CardContent>
@@ -168,7 +168,7 @@ function PredictionSkeleton() {
               <Skeleton className="h-6 w-6 rounded-full" />
               <Skeleton className="h-6 w-40" />
             </CardTitle>
-          </CardHeader>
+          </Header>
           <CardContent className="space-y-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
