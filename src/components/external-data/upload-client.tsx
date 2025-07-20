@@ -168,7 +168,7 @@ function PredictionSkeleton() {
               <Skeleton className="h-6 w-6 rounded-full" />
               <Skeleton className="h-6 w-40" />
             </CardTitle>
-          </Header>
+          </CardHeader>
           <CardContent className="space-y-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
@@ -187,5 +187,5 @@ function PredictionSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
