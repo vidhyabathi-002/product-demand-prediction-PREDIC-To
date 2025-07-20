@@ -18,9 +18,9 @@ import { useUser } from "@/context/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/external-data", "/reports"],
-  "Marketing Team": ["/dashboard", "/analytics"],
-  "Data Scientist": ["/external-data"],
+  "Product Manager": ["/dashboard", "/analytics"],
+  "Marketing Team": ["/dashboard", "/analytics", "/reports"],
+  "Data Scientist": ["/dashboard", "/external-data", "/reports", "/analytics"],
   "Administrator": ["/dashboard", "/external-data", "/reports", "/analytics"],
 };
 
