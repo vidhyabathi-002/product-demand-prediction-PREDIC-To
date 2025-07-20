@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChartHorizontal, Settings, PieChart, FileText, Home, LogOut } from "lucide-react";
+import { BarChartHorizontal, Settings, PieChart, FileText, Home, LogOut, UploadCloud } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -19,6 +19,7 @@ export function AppSidebar() {
 
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/external-data", label: "External Data", icon: UploadCloud },
     { href: "/analytics", label: "Analytics", icon: PieChart },
     { href: "/reports", label: "Reports", icon: FileText },
   ];
