@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { BarChart3 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,8 +27,7 @@ export default function LoginPage() {
       <Card className="mx-auto max-w-sm">
         <CardHeader>
           <div className="flex items-center justify-center gap-2 mb-4">
-            <BarChart3 className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-semibold tracking-tight">predicTo</h1>
+            <h1 className="text-3xl font-bold tracking-tight">predicTo</h1>
           </div>
           <CardTitle className="text-2xl text-center">Login</CardTitle>
           <CardDescription className="text-center">

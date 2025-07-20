@@ -1,8 +1,9 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChartHorizontal, Settings, PieChart, FileText, Home, LogOut, UploadCloud } from "lucide-react";
+import { Settings, PieChart, FileText, Home, LogOut, UploadCloud } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -33,7 +34,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <BarChartHorizontal className="w-8 h-8 text-primary" />
+          <h1 className="text-2xl font-semibold tracking-tight text-primary">predicTo</h1>
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-4">
