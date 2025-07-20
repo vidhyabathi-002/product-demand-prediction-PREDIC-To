@@ -1,9 +1,15 @@
-// Summarizes market analysis documents to highlight key trends and demand drivers.
-
+// src/ai/flows/summarize-market-analysis.ts
 'use server';
+/**
+ * @fileOverview Summarizes market analysis documents to highlight key trends and demand drivers.
+ *
+ * - summarizeMarketAnalysis - A function that summarizes market analysis documents.
+ * - SummarizeMarketAnalysisInput - The input type for the summarizeMarketAnalysis function.
+ * - SummarizeMarketAnalysisOutput - The return type for the summarizeMarketAnalysis function.
+ */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 const SummarizeMarketAnalysisInputSchema = z.object({
   documentDataUri: z
