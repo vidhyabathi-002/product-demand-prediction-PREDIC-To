@@ -16,7 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 import type { SocialSentimentAnalysisOutput } from "@/ai/flows/social-sentiment-analysis";
 
 type ChartData = SocialSentimentAnalysisOutput['sentimentDistribution'];
@@ -49,10 +49,12 @@ const COLORS = {
 };
 
 export function SentimentChart({ data }: { data: ChartData }) {
+  const totalPosts = data.positive + data.negative + data.neutral;
+  
   const chartData = [
-    { sentiment: "positive", posts: data.positive, fill: COLORS.positive },
-    { sentiment: "negative", posts: data.negative, fill: COLORS.negative },
-    { sentiment: "neutral", posts: data.neutral, fill: COLORS.neutral },
+    { sentiment: "positive", posts: data.positive, fill: COLORS.positive, percentage: totalPosts > 0 ? Math.round((data.positive / totalPosts) * 100) : 0 },
+    { sentiment: "negative", posts: data.negative, fill: COLORS.negative, percentage: totalPosts > 0 ? Math.round((data.negative / totalPosts) * 100) : 0 },
+    { sentiment: "neutral", posts: data.neutral, fill: COLORS.neutral, percentage: totalPosts > 0 ? Math.round((data.neutral / totalPosts) * 100) : 0 },
   ];
 
   return (
@@ -67,7 +69,7 @@ export function SentimentChart({ data }: { data: ChartData }) {
             layout="vertical"
             margin={{
               left: 10,
-              right: 10,
+              right: 30, // Add more margin for the percentage label
             }}
             accessibilityLayer
           >
@@ -87,7 +89,15 @@ export function SentimentChart({ data }: { data: ChartData }) {
               cursor={false}
               content={<ChartTooltipContent  hideLabel indicator="line" />}
             />
-            <Bar dataKey="posts" layout="vertical" radius={5} />
+            <Bar dataKey="posts" layout="vertical" radius={5}>
+                 <LabelList 
+                    dataKey="percentage" 
+                    position="right" 
+                    offset={8} 
+                    className="fill-foreground text-sm"
+                    formatter={(value: number) => `${value}%`}
+                />
+            </Bar>
           </BarChart>
         </ChartContainer>
       </CardContent>
