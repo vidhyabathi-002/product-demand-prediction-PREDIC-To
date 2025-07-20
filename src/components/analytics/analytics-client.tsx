@@ -11,7 +11,7 @@ export default function AnalyticsClient({ children }: { children: ReactNode }) {
           Analyze market and social data to refine your forecasts.
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-6">
+      <div className="flex flex-col gap-6">
         {children}
       </div>
     </div>

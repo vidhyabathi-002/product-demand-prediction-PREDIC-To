@@ -22,6 +22,11 @@ const SocialSentimentAnalysisOutputSchema = z.object({
     revisedForecast: z.number().describe('The revised sales forecast based on social media sentiment.'),
     summary: z.string().describe('A summary of the sentiment analysis, highlighting key themes and justification for the revised forecast.'),
     sentiment: z.enum(['Positive', 'Negative', 'Mixed', 'Neutral']).describe('The overall sentiment of the social media posts.'),
+    sentimentDistribution: z.object({
+      positive: z.number().describe('The number of positive posts.'),
+      negative: z.number().describe('The number of negative posts.'),
+      neutral: z.number().describe('The number of neutral posts.'),
+    }).describe('The distribution of sentiments across all posts.'),
 });
 export type SocialSentimentAnalysisOutput = z.infer<typeof SocialSentimentAnalysisOutputSchema>;
 
@@ -42,9 +47,10 @@ Current Forecast: {{{currentForecast}}}
 Social Media Posts:
 {{{socialMediaPosts}}}
 
-Analyze the sentiment in the posts. Consider the positive and negative comments. Based on the overall sentiment, revise the current forecast. If sentiment is largely positive, increase the forecast. If it's largely negative, decrease it. If it's mixed, adjust it moderately.
-
-Provide a summary explaining your reasoning, the overall sentiment, and the revised forecast.`,
+Analyze the sentiment in the posts. Consider the positive and negative comments.
+1.  Count the number of posts that are primarily positive, negative, and neutral. Return this in the 'sentimentDistribution' field.
+2.  Based on the overall sentiment, revise the current forecast. If sentiment is largely positive, increase the forecast. If it's largely negative, decrease it. If it's mixed, adjust it moderately.
+3.  Provide a summary explaining your reasoning, the overall sentiment, and the revised forecast.`,
 });
 
 const socialSentimentAnalysisFlow = ai.defineFlow(
