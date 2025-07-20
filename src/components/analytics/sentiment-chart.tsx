@@ -16,7 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Pie, PieChart, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import type { SocialSentimentAnalysisOutput } from "@/ai/flows/social-sentiment-analysis";
 
 type ChartData = SocialSentimentAnalysisOutput['sentimentDistribution'];
@@ -37,6 +37,9 @@ const chartConfig = {
     color: "hsl(var(--muted-foreground))",
     icon: CircleHelp,
   },
+  posts: {
+    label: "Posts",
+  }
 } satisfies ChartConfig;
 
 const COLORS = {
@@ -47,41 +50,52 @@ const COLORS = {
 
 export function SentimentChart({ data }: { data: ChartData }) {
   const chartData = [
-    { name: "positive", value: data.positive, fill: COLORS.positive },
-    { name: "negative", value: data.negative, fill: COLORS.negative },
-    { name: "neutral", value: data.neutral, fill: COLORS.neutral },
-  ].filter(d => d.value > 0);
+    { sentiment: "positive", posts: data.positive, fill: COLORS.positive },
+    { sentiment: "negative", posts: data.negative, fill: COLORS.negative },
+    { sentiment: "neutral", posts: data.neutral, fill: COLORS.neutral },
+  ];
 
   return (
     <Card className="flex flex-col sm:col-span-1">
       <CardHeader className="items-center pb-0">
         <CardTitle>Sentiment Distribution</CardTitle>
+        <CardDescription>Number of posts by sentiment</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
           className="mx-auto aspect-square h-full"
         >
-          <PieChart>
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            margin={{
+              left: 10,
+              right: 10,
+            }}
+            accessibilityLayer
+          >
+            <CartesianGrid horizontal={false} />
+            <YAxis
+              dataKey="sentiment"
+              type="category"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) =>
+                chartConfig[value as keyof typeof chartConfig]?.label
+              }
+            />
+            <XAxis dataKey="posts" type="number" hide />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContent  hideLabel indicator="line" />}
             />
-            <Pie
-              data={chartData}
-              dataKey="value"
-              nameKey="name"
-              innerRadius={50}
-              strokeWidth={5}
-            >
-               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </Pie>
-          </PieChart>
+            <Bar dataKey="posts" layout="vertical" radius={5} />
+          </BarChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm pt-4">
+       <CardFooter className="flex-col gap-2 text-sm pt-4">
         <div className="flex items-center gap-2 font-medium leading-none">
           Post Sentiment Breakdown
         </div>
