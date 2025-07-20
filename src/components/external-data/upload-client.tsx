@@ -120,7 +120,7 @@ export default function UploadClient() {
                   <BarChart className="h-5 w-5 text-primary" />
                   Prediction Summary
                 </CardTitle>
-              </Header>
+              </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">{prediction.summary}</p>
               </CardContent>
