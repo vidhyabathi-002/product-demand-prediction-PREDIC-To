@@ -41,7 +41,7 @@ export function AppSidebar() {
        <Sidebar>
           <SidebarHeader className="p-4 no-print">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-primary">DemandWise</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-primary">predicTo</h1>
             </Link>
           </SidebarHeader>
           <SidebarContent className="p-4 no-print">
@@ -64,7 +64,7 @@ export function AppSidebar() {
       <SidebarHeader className="p-4 no-print">
         <Link href="/dashboard" className="flex items-center gap-2">
            <Shield className="w-8 h-8 text-primary" />
-          <h1 className="text-2xl font-semibold tracking-tight text-primary">DemandWise</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-primary">predicTo</h1>
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-4 no-print">
