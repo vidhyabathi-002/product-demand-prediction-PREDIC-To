@@ -23,31 +23,31 @@ import {
 import type { UserRole } from '@/context/user-context';
 
 const AppLogo = () => (
-    <svg
-      width="32"
-      height="32"
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="text-primary"
-    >
-      <rect width="32" height="32" rx="8" fill="currentColor" />
-      <path
-        d="M9 23V15.7778C9 13.6929 10.6929 12 12.7778 12H20"
-        stroke="hsl(var(--primary-foreground))"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M15 17L20 12L15 7"
-        stroke="hsl(var(--primary-foreground))"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
+  <svg
+    width="32"
+    height="32"
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="text-primary"
+  >
+    <rect width="32" height="32" rx="8" fill="currentColor" />
+    <path
+      d="M16 10V16"
+      stroke="hsl(var(--primary-foreground))"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M21.6569 14.3431C20.4571 13.1434 18.8073 12.5 17.0711 12.5C14.3097 12.5 12 14.8097 12 17.5711C12 19.3073 12.6434 20.9571 13.8431 22.1569"
+      stroke="hsl(var(--primary-foreground))"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 
 export function LoginForm() {
