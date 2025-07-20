@@ -44,16 +44,13 @@ const generatePromotionalTextPrompt = ai.definePrompt({
   name: 'generatePromotionalTextPrompt',
   input: {schema: GeneratePromotionalTextInputSchema},
   output: {schema: GeneratePromotionalTextOutputSchema},
-  prompt: `You are an expert marketing copywriter. Based on the predicted demand, target demographics, and product description, generate compelling promotional text variations.  The variations should be engaging and tailored to the specified audience, while highlighting the product's key features.
+  prompt: `You are an expert marketing copywriter. Based on the predicted demand, target demographics, and product description, generate a compelling promotional text. The text should be engaging and tailored to the specified audience, while highlighting the product's key features.
 
 Predicted Demand: {{{predictedDemand}}}
 Target Demographics: {{{targetDemographics}}}
 Product Description: {{{productDescription}}}
 
-Generate three different promotional text options:
-1.
-2.
-3.`,
+Return a single, well-formatted promotional text.`,
 });
 
 const generatePromotionalTextFlow = ai.defineFlow(
