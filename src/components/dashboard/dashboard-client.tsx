@@ -56,13 +56,15 @@ export default function DashboardClient({ children }: { children: ReactNode }) {
         <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+                    <div className="flex items-start gap-4">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                             <TrendingUp className="h-5 w-5 text-primary" />
                         </div>
-                        <div>
-                        <CardTitle>Sales Performance</CardTitle>
-                        <CardDescription>Track real-time sales against projections.</CardDescription>
+                        <div className="flex-1">
+                            <CardTitle>Sales Performance</CardTitle>
+                            <CardDescription>
+                                Dataset: Real-Time Sales Data. This chart tracks actual sales against projections.
+                            </CardDescription>
                         </div>
                     </div>
                 </CardHeader>
