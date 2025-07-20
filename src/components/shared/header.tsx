@@ -17,10 +17,10 @@ const roleAvatars: Record<UserRole, string> = {
 };
 
 const roleAvatarHints: Record<UserRole, string> = {
-    'Product Manager': 'strategy blueprint',
-    'Marketing Team': 'growth chart',
-    'Data Scientist': 'data nodes',
-    'Administrator': 'secure shield',
+    'Product Manager': 'product roadmap',
+    'Marketing Team': 'campaign success',
+    'Data Scientist': 'neural network',
+    'Administrator': 'system cog',
 }
 
 export function AppHeader() {
