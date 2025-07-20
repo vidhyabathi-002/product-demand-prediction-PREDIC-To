@@ -22,7 +22,7 @@ type ChartData = PredictDemandFromCsvOutput['chartData'];
 const chartConfig = {
   historical: {
     label: "Historical",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--muted-foreground))",
   },
   predicted: {
     label: "Predicted",
@@ -69,7 +69,7 @@ export function PredictionChart({ data }: { data: ChartData }) {
                   <stop
                     offset="5%"
                     stopColor="var(--color-historical)"
-                    stopOpacity={0.8}
+                    stopOpacity={0.4}
                   />
                   <stop
                     offset="95%"
