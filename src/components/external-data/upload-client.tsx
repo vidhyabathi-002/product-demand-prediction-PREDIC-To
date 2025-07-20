@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, BarChart, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -126,6 +126,24 @@ export default function UploadClient() {
               </CardContent>
             </Card>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+               <Card className="p-4">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                   {prediction.salesTrend === 'Increasing' ? (
+                      <TrendingUp className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <TrendingDown className="h-5 w-5 text-red-500" />
+                    )}
+                  <span className="text-sm">Sales Trend</span>
+                </div>
+                <p className="text-2xl font-bold">{prediction.salesTrend}</p>
+              </Card>
+               <Card className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <span className="text-sm">Peak Demand</span>
+                  </div>
+                <p className="text-2xl font-bold">{prediction.peakDemandPeriod}</p>
+              </Card>
               <Card className="p-4">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <CheckCircle className="h-5 w-5 text-green-500" />
@@ -178,6 +196,14 @@ function PredictionSkeleton() {
         </Card>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
           <Card className="p-4 space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-8 w-16" />
+          </Card>
+          <Card className="p-4 space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-8 w-16" />
+          </Card>
+           <Card className="p-4 space-y-2">
             <Skeleton className="h-5 w-24" />
             <Skeleton className="h-8 w-16" />
           </Card>
