@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { predictDemandFromCsv, type PredictDemandFromCsvOutput } from '@/ai/flows/predict-demand-from-csv';
 import { Skeleton } from '../ui/skeleton';
+import { PredictionChart } from './prediction-chart';
 
 export default function UploadClient() {
   const [file, setFile] = useState<File | null>(null);
@@ -107,36 +108,40 @@ export default function UploadClient() {
       {loading && <PredictionSkeleton />}
 
       {prediction && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart className="h-6 w-6 text-primary" />
-              Demand Prediction Result
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-lg">Prediction Summary</h3>
-              <p className="text-muted-foreground">{prediction.summary}</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <Card className="p-4">
-                 <div className="flex items-center gap-2 text-muted-foreground">
-                   <CheckCircle className="h-5 w-5 text-green-500" />
-                   <span className="text-sm">Predicted Units</span>
-                 </div>
-                 <p className="text-2xl font-bold">{prediction.predictedUnits.toLocaleString()}</p>
-               </Card>
-               <Card className="p-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+             {prediction.forecastData && <PredictionChart data={prediction.forecastData} />}
+          </div>
+          <div className="lg:col-span-1 flex flex-col gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BarChart className="h-5 w-5 text-primary" />
+                  Prediction Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{prediction.summary}</p>
+              </CardContent>
+            </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+              <Card className="p-4">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span className="text-sm">Total Predicted Units</span>
+                </div>
+                <p className="text-2xl font-bold">{prediction.predictedUnits.toLocaleString()}</p>
+              </Card>
+              <Card className="p-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <AlertTriangle className="h-5 w-5 text-amber-500" />
                     <span className="text-sm">Confidence Level</span>
                   </div>
-                 <p className="text-2xl font-bold">{prediction.confidence}</p>
-               </Card>
+                <p className="text-2xl font-bold">{prediction.confidence}</p>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -144,20 +149,33 @@ export default function UploadClient() {
 
 function PredictionSkeleton() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-           <Skeleton className="h-6 w-6 rounded-full" />
-           <Skeleton className="h-6 w-48" />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Skeleton className="h-5 w-32 mb-2" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4 mt-2" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-1/2 mb-2" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-80 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+      <div className="lg:col-span-1 flex flex-col gap-6">
+         <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <Skeleton className="h-6 w-40" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+          </CardContent>
+        </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
           <Card className="p-4 space-y-2">
             <Skeleton className="h-5 w-24" />
             <Skeleton className="h-8 w-16" />
@@ -167,7 +185,7 @@ function PredictionSkeleton() {
             <Skeleton className="h-8 w-16" />
           </Card>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
