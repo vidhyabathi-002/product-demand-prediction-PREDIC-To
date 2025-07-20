@@ -23,30 +23,23 @@ import {
 import type { UserRole } from '@/context/user-context';
 
 const AppLogo = () => (
-  <svg
-    width="32"
-    height="32"
-    viewBox="0 0 32 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="text-primary"
-  >
-    <rect width="32" height="32" rx="8" fill="currentColor" />
-    <path
-      d="M16 10V16"
-      stroke="hsl(var(--primary-foreground))"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M21.6569 14.3431C20.4571 13.1434 18.8073 12.5 17.0711 12.5C14.3097 12.5 12 14.8097 12 17.5711C12 19.3073 12.6434 20.9571 13.8431 22.1569"
-      stroke="hsl(var(--primary-foreground))"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-primary"
+    >
+      <rect width="32" height="32" rx="8" fill="currentColor" />
+      <path
+        d="M22.5 12.5C24.5 14.5 24.5 17.5 22.5 19.5L16 26L9.5 19.5C7.5 17.5 7.5 14.5 9.5 12.5C11.5 10.5 14.5 10.5 16.5 12.5L16 13L15.5 12.5C17.5 10.5 20.5 10.5 22.5 12.5Z"
+        stroke="hsl(var(--primary-foreground))"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
 );
 
 
