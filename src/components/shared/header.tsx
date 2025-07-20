@@ -10,7 +10,7 @@ export function AppHeader() {
   const pathname = usePathname();
   const getTitle = () => {
     switch (pathname) {
-      case "/":
+      case "/dashboard":
         return "Dashboard";
       case "/external-data":
         return "External Data";

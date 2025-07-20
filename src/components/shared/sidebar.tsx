@@ -17,7 +17,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/external-data", label: "External Data", icon: Upload },
     { href: "/ai-insights", label: "AI Insights", icon: Bot },
   ];
@@ -25,7 +25,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <BarChart3 className="w-6 h-6 text-primary" />
           <h1 className="text-lg font-semibold tracking-tight">predicTo</h1>
         </Link>
