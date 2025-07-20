@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, PieChart, FileText, Home, LogOut, UploadCloud } from "lucide-react";
+import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Shield } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -14,16 +14,45 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { useUser } from "@/context/user-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-export function AppSidebar() {
-  const pathname = usePathname();
+const navConfig = {
+  "Product Manager": ["/dashboard", "/external-data", "/reports"],
+  "Marketing Team": ["/dashboard", "/analytics"],
+  "Data Scientist": ["/external-data"],
+  "Administrator": ["/dashboard", "/external-data", "/reports", "/analytics"],
+};
 
-  const menuItems = [
+const allMenuItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/external-data", label: "External Data", icon: UploadCloud },
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/analytics", label: "Analytics", icon: PieChart },
-  ];
+];
+
+export function AppSidebar() {
+  const pathname = usePathname();
+  const { user, loading } = useUser();
+  const isMobile = useIsMobile();
+
+  if (loading && !isMobile) {
+    return (
+       <Sidebar>
+          <SidebarHeader className="p-4 no-print">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-primary">DemandWise</h1>
+            </Link>
+          </SidebarHeader>
+          <SidebarContent className="p-4 no-print">
+          </SidebarContent>
+       </Sidebar>
+    )
+  }
+
+  const allowedRoutes = user?.role ? navConfig[user.role] : [];
+  const menuItems = allMenuItems.filter(item => allowedRoutes.includes(item.href));
+
 
   const bottomMenuItems = [
     { href: "/settings", label: "Settings", icon: Settings },
@@ -34,7 +63,8 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4 no-print">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-primary">predicTo</h1>
+           <Shield className="w-8 h-8 text-primary" />
+          <h1 className="text-2xl font-semibold tracking-tight text-primary">DemandWise</h1>
         </Link>
       </SidebarHeader>
       <SidebarContent className="p-4 no-print">
