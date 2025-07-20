@@ -26,7 +26,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <Link href="/" className="flex items-center gap-2">
           <BarChart3 className="w-6 h-6 text-primary" />
-          <h1 className="text-lg font-semibold tracking-tight">DemandWise</h1>
+          <h1 className="text-lg font-semibold tracking-tight">predicTo</h1>
         </Link>
       </SidebarHeader>
       <SidebarContent>

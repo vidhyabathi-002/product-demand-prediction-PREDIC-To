@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'DemandWise',
+  title: 'predicTo',
   description: 'Predict product demand for new launches using data science.',
 };
 

@@ -13,7 +13,7 @@ export function AppHeader() {
       case "/":
         return "Dashboard";
       default:
-        return "DemandWise";
+        return "predicTo";
     }
   };
 
