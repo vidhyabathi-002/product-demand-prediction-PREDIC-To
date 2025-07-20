@@ -21,7 +21,33 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { UserRole } from '@/context/user-context';
-import { Shield } from 'lucide-react';
+
+const AppLogo = () => (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-primary"
+    >
+      <rect width="32" height="32" rx="8" fill="currentColor" />
+      <path
+        d="M9 23V15.7778C9 13.6929 10.6929 12 12.7778 12H20"
+        stroke="hsl(var(--primary-foreground))"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15 17L20 12L15 7"
+        stroke="hsl(var(--primary-foreground))"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
 
 export function LoginForm() {
@@ -46,7 +72,7 @@ export function LoginForm() {
       <Card className="mx-auto max-w-sm">
         <CardHeader>
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Shield className="w-8 h-8 text-primary" />
+            <AppLogo />
             <h1 className="text-3xl font-bold tracking-tight">predicTo</h1>
           </div>
           <CardTitle className="text-2xl text-center">Login</CardTitle>

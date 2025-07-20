@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Shield } from "lucide-react";
+import { Settings, PieChart, FileText, Home, LogOut, UploadCloud } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -30,6 +30,33 @@ const allMenuItems = [
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/analytics", label: "Analytics", icon: PieChart },
 ];
+
+const AppLogo = () => (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="text-primary"
+    >
+      <rect width="32" height="32" rx="8" fill="currentColor" />
+      <path
+        d="M9 23V15.7778C9 13.6929 10.6929 12 12.7778 12H20"
+        stroke="hsl(var(--primary-foreground))"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M15 17L20 12L15 7"
+        stroke="hsl(var(--primary-foreground))"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -63,7 +90,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="p-4 no-print">
         <Link href="/dashboard" className="flex items-center gap-2">
-           <Shield className="w-8 h-8 text-primary" />
+           <AppLogo />
           <h1 className="text-2xl font-semibold tracking-tight text-primary">predicTo</h1>
         </Link>
       </SidebarHeader>
