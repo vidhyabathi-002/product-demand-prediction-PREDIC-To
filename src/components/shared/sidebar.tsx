@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, LayoutDashboard, Settings, Bot, Upload } from "lucide-react";
+import { BarChartHorizontal, Settings, PieChart, FileText, Home, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -11,49 +11,61 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
 export function AppSidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/external-data", label: "External Data", icon: Upload },
-    { href: "/ai-insights", label: "AI Insights", icon: Bot },
+    { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/analytics", label: "Analytics", icon: PieChart },
+    { href: "/reports", label: "Reports", icon: FileText },
   ];
+
+  const bottomMenuItems = [
+    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/login", label: "Login Page", icon: LogOut },
+  ]
 
   return (
     <Sidebar>
-      <SidebarHeader>
+      <SidebarHeader className="p-4">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <BarChart3 className="w-6 h-6 text-primary" />
-          <h1 className="text-lg font-semibold tracking-tight">predicTo</h1>
+          <BarChartHorizontal className="w-8 h-8 text-primary" />
         </Link>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="p-4">
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton asChild isActive={pathname === item.href}>
+              <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)} variant="default" size="default" className="justify-start data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground">
                 <Link href={item.href}>
-                  <item.icon />
-                  {item.label}
+                  <item.icon className="w-5 h-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    {item.label}
+                  </span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="p-4">
+        <SidebarSeparator className="mb-4" />
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="#">
-                <Settings />
-                Settings
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {bottomMenuItems.map((item) => (
+             <SidebarMenuItem key={item.href}>
+             <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)} variant="default" size="default" className="justify-start data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground">
+               <Link href={item.href}>
+                 <item.icon className="w-5 h-5" />
+                 <span className="group-data-[collapsible=icon]:hidden">
+                   {item.label}
+                 </span>
+               </Link>
+             </SidebarMenuButton>
+           </SidebarMenuItem>
+          ))}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>

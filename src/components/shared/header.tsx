@@ -5,29 +5,21 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Bell } from "lucide-react";
 
 export function AppHeader() {
   const pathname = usePathname();
-  const getTitle = () => {
-    switch (pathname) {
-      case "/dashboard":
-        return "Dashboard";
-      case "/external-data":
-        return "External Data";
-      case "/ai-insights":
-        return "AI Insights";
-      default:
-        return "predicTo";
-    }
-  };
-
+  
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6 lg:px-8 sticky top-0 z-10">
+    <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 sm:px-6 lg:px-8 sticky top-0 z-10">
       <div className="flex items-center gap-4">
         <SidebarTrigger className="md:hidden" />
-        <h1 className="text-xl font-semibold hidden md:block">{getTitle()}</h1>
       </div>
       <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Bell className="h-5 w-5" />
+          <span className="sr-only">Notifications</span>
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
