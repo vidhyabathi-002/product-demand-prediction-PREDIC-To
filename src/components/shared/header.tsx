@@ -12,6 +12,10 @@ export function AppHeader() {
     switch (pathname) {
       case "/":
         return "Dashboard";
+      case "/external-data":
+        return "External Data";
+      case "/ai-insights":
+        return "AI Insights";
       default:
         return "predicTo";
     }

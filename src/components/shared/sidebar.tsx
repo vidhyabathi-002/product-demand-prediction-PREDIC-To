@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, LayoutDashboard, Settings, Bot } from "lucide-react";
+import { BarChart3, LayoutDashboard, Settings, Bot, Upload } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -18,6 +18,7 @@ export function AppSidebar() {
 
   const menuItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/external-data", label: "External Data", icon: Upload },
     { href: "/ai-insights", label: "AI Insights", icon: Bot },
   ];
 
