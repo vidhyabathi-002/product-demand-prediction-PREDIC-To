@@ -11,14 +11,14 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
 
-export const SocialSentimentAnalysisInputSchema = z.object({
+const SocialSentimentAnalysisInputSchema = z.object({
   productName: z.string().describe('The name of the product being analyzed.'),
   currentForecast: z.number().describe('The current sales forecast for the product.'),
   socialMediaPosts: z.string().describe('A collection of social media posts about the product.'),
 });
 export type SocialSentimentAnalysisInput = z.infer<typeof SocialSentimentAnalysisInputSchema>;
 
-export const SocialSentimentAnalysisOutputSchema = z.object({
+const SocialSentimentAnalysisOutputSchema = z.object({
     revisedForecast: z.number().describe('The revised sales forecast based on social media sentiment.'),
     summary: z.string().describe('A summary of the sentiment analysis, highlighting key themes and justification for the revised forecast.'),
     sentiment: z.enum(['Positive', 'Negative', 'Mixed', 'Neutral']).describe('The overall sentiment of the social media posts.'),
