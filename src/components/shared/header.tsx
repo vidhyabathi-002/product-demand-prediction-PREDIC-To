@@ -10,11 +10,18 @@ import { Bell } from "lucide-react";
 import { useUser, type UserRole } from "@/context/user-context";
 
 const roleAvatars: Record<UserRole, string> = {
-  'Product Manager': 'https://i.pravatar.cc/150?u=product-manager',
-  'Marketing Team': 'https://i.pravatar.cc/150?u=marketing-team',
-  'Data Scientist': 'https://i.pravatar.cc/150?u=data-scientist',
-  'Administrator': 'https://i.pravatar.cc/150?u=administrator',
+  'Product Manager': 'https://placehold.co/150x150.png',
+  'Marketing Team': 'https://placehold.co/150x150.png',
+  'Data Scientist': 'https://placehold.co/150x150.png',
+  'Administrator': 'https://placehold.co/150x150.png',
 };
+
+const roleAvatarHints: Record<UserRole, string> = {
+    'Product Manager': 'strategy blueprint',
+    'Marketing Team': 'growth chart',
+    'Data Scientist': 'data nodes',
+    'Administrator': 'secure shield',
+}
 
 export function AppHeader() {
   const { user, setUser } = useUser();
@@ -25,7 +32,8 @@ export function AppHeader() {
     router.push('/login');
   }
 
-  const avatarUrl = user ? roleAvatars[user.role] : 'https://i.pravatar.cc/150';
+  const avatarUrl = user ? roleAvatars[user.role] : 'https://placehold.co/150x150.png';
+  const avatarHint = user ? roleAvatarHints[user.role] : 'abstract logo';
   
   return (
     <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 sm:px-6 lg:px-8 sticky top-0 z-10 no-print">
@@ -41,7 +49,7 @@ export function AppHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={avatarUrl} alt="@user" />
+                <AvatarImage src={avatarUrl} alt={user?.role} data-ai-hint={avatarHint} />
                 <AvatarFallback>{user?.name?.[0] ?? 'U'}</AvatarFallback>
               </Avatar>
             </Button>
