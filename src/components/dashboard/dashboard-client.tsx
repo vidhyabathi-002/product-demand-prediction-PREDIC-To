@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { DemandChart, type ChartData } from "./demand-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { TrendingUp, DollarSign, Users, Target } from "lucide-react";
 import { KpiCard } from "./kpi-card";
-import { PromoCard } from "./promo-card";
 import { SimulationPanel, type SimulationParams } from "./simulation-panel";
 
 const initialMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
-export default function DashboardClient() {
+export default function DashboardClient({ children }: { children: ReactNode }) {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [simulationParams, setSimulationParams] = useState<SimulationParams>({
     marketingSpend: 500,
@@ -63,7 +62,7 @@ export default function DashboardClient() {
         </div>
       </div>
        <div className="grid grid-cols-1 gap-6">
-        <PromoCard />
+        {children}
       </div>
     </div>
   );

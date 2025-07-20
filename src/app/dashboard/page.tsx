@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/shared/sidebar";
 import { AppHeader } from "@/components/shared/header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import DashboardClient from "@/components/dashboard/dashboard-client";
+import { PromoCard } from "@/components/dashboard/promo-card";
 
 export default function DashboardPage() {
   return (
@@ -10,7 +11,9 @@ export default function DashboardPage() {
       <SidebarInset>
         <AppHeader />
         <main className="p-4 sm:p-6 lg:p-8">
-            <DashboardClient />
+          <DashboardClient>
+            <PromoCard />
+          </DashboardClient>
         </main>
       </SidebarInset>
     </SidebarProvider>
