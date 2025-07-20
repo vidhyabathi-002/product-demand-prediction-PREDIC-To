@@ -2,6 +2,11 @@ import { AppSidebar } from "@/components/shared/sidebar";
 import { AppHeader } from "@/components/shared/header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import UploadClient from "@/components/external-data/upload-client";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "External Data",
+};
 
 export default function ExternalDataPage() {
   return (

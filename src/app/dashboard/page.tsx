@@ -3,6 +3,11 @@ import { AppHeader } from "@/components/shared/header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import DashboardClient from "@/components/dashboard/dashboard-client";
 import { PromoCard } from "@/components/dashboard/promo-card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 
 export default function DashboardPage() {
   return (

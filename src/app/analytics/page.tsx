@@ -3,6 +3,11 @@ import { AppHeader } from "@/components/shared/header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AnalyticsClient from "@/components/analytics/analytics-client";
 import { SocialSentimentCard } from "@/components/analytics/social-sentiment-card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Analytics",
+};
 
 export default function AnalyticsPage() {
   return (

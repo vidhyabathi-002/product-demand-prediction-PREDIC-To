@@ -3,7 +3,10 @@ import type { Metadata } from 'next';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'predicTo',
+  title: {
+    template: '%s - predicTo',
+    default: 'predicTo',
+  },
   description: 'Predict product demand for new launches using data science.',
 };
 
