@@ -57,11 +57,7 @@ export function SentimentChart({ data }: { data: ChartData }) {
 
   return (
     <Card className="flex flex-col sm:col-span-1">
-      <CardHeader className="items-center pb-0">
-        <CardTitle>Sentiment Distribution</CardTitle>
-        <CardDescription>Number of posts by sentiment</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 pb-0">
+      <CardContent className="flex-1 pb-0 pt-6">
         <ChartContainer
           config={chartConfig}
           className="mx-auto aspect-square h-full"
@@ -95,13 +91,9 @@ export function SentimentChart({ data }: { data: ChartData }) {
           </BarChart>
         </ChartContainer>
       </CardContent>
-       <CardFooter className="flex-col gap-2 text-sm pt-4">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          Post Sentiment Breakdown
-        </div>
-        <div className="flex items-center gap-2 leading-none text-muted-foreground">
-          Based on analyzed social media posts
-        </div>
+       <CardFooter className="flex-col gap-1.5 items-center text-sm pt-4 pb-6">
+        <CardTitle className="text-base">Sentiment Distribution</CardTitle>
+        <CardDescription>Number of posts by sentiment</CardDescription>
       </CardFooter>
     </Card>
   );
