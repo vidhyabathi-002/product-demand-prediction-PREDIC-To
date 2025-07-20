@@ -18,6 +18,7 @@ export default function DashboardClient({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
+    // This is just a mock data generation function for the simulation
     const data: ChartData[] = initialMonths.map((month) => ({
       month,
       projected: Math.round(1500 + Math.random() * 1000 + simulationParams.marketingSpend * 2 - simulationParams.price + (100-simulationParams.competitorActivity) * 5),
