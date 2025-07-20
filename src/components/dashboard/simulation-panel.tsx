@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -35,7 +36,7 @@ export function SimulationPanel({ params, onParamsChange }: SimulationPanelProps
           <div className="flex justify-between items-center">
             <Label htmlFor="marketing-spend">Marketing Spend</Label>
             <span className="w-20 text-right font-mono text-sm text-muted-foreground">
-              ${params.marketingSpend}k
+              ₹{params.marketingSpend}k
             </span>
           </div>
           <Slider
@@ -53,14 +54,14 @@ export function SimulationPanel({ params, onParamsChange }: SimulationPanelProps
           <div className="flex justify-between items-center">
             <Label htmlFor="price">Product Price</Label>
             <span className="w-20 text-right font-mono text-sm text-muted-foreground">
-              ${params.price}
+              ₹{params.price.toLocaleString('en-IN')}
             </span>
           </div>
           <Slider
             id="price"
-            min={199}
-            max={999}
-            step={10}
+            min={19999}
+            max={99999}
+            step={1000}
             value={[params.price]}
             onValueChange={([value]) => onParamsChange({ ...params, price: value })}
           />

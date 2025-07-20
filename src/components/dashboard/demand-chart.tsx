@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -48,7 +49,7 @@ export function DemandChart({ data }: { data: ChartData[] }) {
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            tickFormatter={(value) => `${Number(value) / 1000}K`}
+            tickFormatter={(value) => `${Number(value)}`}
           />
           <ChartTooltip
             cursor={false}

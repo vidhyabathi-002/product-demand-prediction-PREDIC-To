@@ -1,19 +1,32 @@
+
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
 import { DemandChart, type ChartData } from "./demand-chart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { TrendingUp, DollarSign, Users, Target } from "lucide-react";
+import { TrendingUp, Users, Target } from "lucide-react";
 import { KpiCard } from "./kpi-card";
 import { SimulationPanel, type SimulationParams } from "./simulation-panel";
 
 const initialMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
+// Custom Icon for INR
+const RupeeSign = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-muted-foreground">
+        <path d="M6 3h12" />
+        <path d="M6 8h12" />
+        <path d="m19 13-10 8" />
+        <path d="M6 13h4" />
+        <path d="M6 17h4" />
+    </svg>
+);
+
+
 export default function DashboardClient({ children }: { children: ReactNode }) {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [simulationParams, setSimulationParams] = useState<SimulationParams>({
     marketingSpend: 500,
-    price: 499,
+    price: 39999,
     competitorActivity: 20,
   });
 
@@ -21,8 +34,8 @@ export default function DashboardClient({ children }: { children: ReactNode }) {
     // This is just a mock data generation function for the simulation
     const data: ChartData[] = initialMonths.map((month) => ({
       month,
-      projected: Math.round(1500 + Math.random() * 1000 + simulationParams.marketingSpend * 2 - simulationParams.price + (100-simulationParams.competitorActivity) * 5),
-      actual: Math.round(1400 + Math.random() * 1200 + simulationParams.marketingSpend * 1.8 - simulationParams.price + (100-simulationParams.competitorActivity) * 4.5),
+      projected: Math.round(150 + Math.random() * 100 + (simulationParams.marketingSpend / 10) * 2 - (simulationParams.price/1000) + (100-simulationParams.competitorActivity) * 0.5),
+      actual: Math.round(140 + Math.random() * 120 + (simulationParams.marketingSpend / 10) * 1.8 - (simulationParams.price/1000) + (100-simulationParams.competitorActivity) * 0.45),
     }));
     setChartData(data);
   }, [simulationParams]);
@@ -34,8 +47,8 @@ export default function DashboardClient({ children }: { children: ReactNode }) {
         <p className="text-muted-foreground">Welcome back! Here's your demand forecast overview.</p>
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <KpiCard title="Projected Revenue" value="$1.2M" icon={DollarSign} description="+20.1% from last month" />
-        <KpiCard title="Avg. Customer Value" value="$2,350" icon={Users} description="+12.5% from last month" />
+        <KpiCard title="Projected Revenue" value="₹9.9Cr" icon={RupeeSign} description="+20.1% from last month" />
+        <KpiCard title="Avg. Customer Value" value="₹1,95,000" icon={Users} description="+12.5% from last month" />
         <KpiCard title="Market Share" value="25%" icon={Target} description="+2% from last quarter" />
         <KpiCard title="Total Sales" value="5,432" icon={TrendingUp} description="+8.2% from last month" />
       </div>
