@@ -38,14 +38,14 @@ const prompt = ai.definePrompt({
   name: 'predictDemandFromCsvPrompt',
   input: {schema: PredictDemandFromCsvInputSchema},
   output: {schema: PredictDemandFromCsvOutputSchema},
-  prompt: `You are a data scientist specializing in demand forecasting. Analyze the following sales data from a CSV file. The CSV will have 'Month' and 'Sales' columns.
+  prompt: `You are a data scientist specializing in demand forecasting. Analyze the following sales data from a CSV file for a single product. The CSV will have 'Month' and 'Sales' columns.
 
   Your tasks are:
   1. Extract the last 6 months of historical data.
   2. Predict the future demand for the next six months based on the historical data.
   3. Provide a concise summary of your findings.
   4. Determine if the overall sales trend for the forecast period is 'Increasing' or 'Decreasing'.
-  5. Identify the month or period with the highest predicted demand.
+  5. Identify the month with the highest predicted sales, and return this as the 'peakDemandPeriod'.
   6. Provide the total predicted number of units to be sold over the next 6 months.
   7. Provide your confidence level in this prediction.
   8. Return a 'chartData' array containing 12 months of data: the last 6 months of historical data and the 6 months of forecasted data.

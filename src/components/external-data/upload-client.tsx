@@ -140,7 +140,7 @@ export default function UploadClient() {
                <Card className="p-4">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="h-5 w-5 text-primary" />
-                    <span className="text-sm">Peak Demand</span>
+                    <span className="text-sm">Peak Demand Period</span>
                   </div>
                 <p className="text-2xl font-bold">{prediction.peakDemandPeriod}</p>
               </Card>
@@ -187,7 +187,7 @@ function PredictionSkeleton() {
               <Skeleton className="h-6 w-6 rounded-full" />
               <Skeleton className="h-6 w-40" />
             </CardTitle>
-          </CardHeader>
+          </Header>
           <CardContent className="space-y-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
