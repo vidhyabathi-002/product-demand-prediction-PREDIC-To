@@ -10,17 +10,17 @@ import { Bell } from "lucide-react";
 import { useUser, type UserRole } from "@/context/user-context";
 
 const roleAvatars: Record<UserRole, string> = {
-  'Product Manager': 'https://placehold.co/150x150.png',
-  'Marketing Team': 'https://placehold.co/150x150.png',
-  'Data Scientist': 'https://placehold.co/150x150.png',
-  'Administrator': 'https://placehold.co/150x150.png',
+  'Product Manager': 'https://placehold.co/150x150/3B5998/FFFFFF.png',
+  'Marketing Team': 'https://placehold.co/150x150/87CEEB/FFFFFF.png',
+  'Data Scientist': 'https://placehold.co/150x150/222222/FFFFFF.png',
+  'Administrator': 'https://placehold.co/150x150/777777/FFFFFF.png',
 };
 
 const roleAvatarHints: Record<UserRole, string> = {
-    'Product Manager': 'product roadmap',
-    'Marketing Team': 'campaign success',
-    'Data Scientist': 'neural network',
-    'Administrator': 'system cog',
+    'Product Manager': 'roadmap logo',
+    'Marketing Team': 'growth chart',
+    'Data Scientist': 'data analysis',
+    'Administrator': 'secure shield',
 }
 
 export function AppHeader() {
