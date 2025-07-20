@@ -1,0 +1,83 @@
+
+'use client';
+import type { PredictDemandFromCsvOutput } from "@/ai/flows/predict-demand-from-csv";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock } from "lucide-react";
+import { PredictionChart } from "../external-data/prediction-chart";
+import { Separator } from "../ui/separator";
+
+interface GeneratedReportProps {
+  data: PredictDemandFromCsvOutput;
+}
+
+export function GeneratedReport({ data }: GeneratedReportProps) {
+    const reportDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+
+  return (
+    <Card className="p-4 sm:p-6 md:p-8 print:shadow-none print:border-none">
+        <CardHeader className="border-b pb-6 mb-6">
+            <CardTitle className="text-4xl font-bold text-primary">Demand Forecast Report</CardTitle>
+            <CardDescription>Generated on: {reportDate}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-8">
+            <div className="prose prose-lg max-w-none dark:prose-invert">
+                <h2 className="text-2xl font-semibold flex items-center gap-2">
+                    <BarChart className="h-6 w-6 text-primary" />
+                    Executive Summary
+                </h2>
+                <p className="text-muted-foreground">{data.summary}</p>
+            </div>
+
+             <Separator />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                   {data.salesTrend === 'Increasing' ? (
+                      <TrendingUp className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <TrendingDown className="h-5 w-5 text-red-500" />
+                    )}
+                  <span className="text-sm font-semibold">Sales Trend</span>
+                </div>
+                <p className="text-2xl font-bold mt-1">{data.salesTrend}</p>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-semibold">Peak Demand</span>
+                  </div>
+                <p className="text-2xl font-bold mt-1">{data.peakDemandPeriod}</p>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span className="text-sm font-semibold">Total Predicted Units</span>
+                </div>
+                <p className="text-2xl font-bold mt-1">{data.predictedUnits.toLocaleString()}</p>
+              </div>
+              <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    <span className="text-sm font-semibold">Confidence</span>
+                  </div>
+                <p className="text-2xl font-bold mt-1">{data.confidence}</p>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+                <h2 className="text-2xl font-semibold mb-4">Forecast Visualization</h2>
+                <div className="border rounded-lg">
+                     {data.chartData && <PredictionChart data={data.chartData} />}
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+  )
+}

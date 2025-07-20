@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname } from "next/navigation";
@@ -11,7 +12,7 @@ export function AppHeader() {
   const pathname = usePathname();
   
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 sm:px-6 lg:px-8 sticky top-0 z-10">
+    <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 sm:px-6 lg:px-8 sticky top-0 z-10 no-print">
       <div className="flex items-center gap-4">
         <SidebarTrigger className="md:hidden" />
       </div>

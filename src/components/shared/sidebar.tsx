@@ -21,8 +21,8 @@ export function AppSidebar() {
   const menuItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/external-data", label: "External Data", icon: UploadCloud },
-    { href: "/analytics", label: "Analytics", icon: PieChart },
     { href: "/reports", label: "Reports", icon: FileText },
+    { href: "/analytics", label: "Analytics", icon: PieChart },
   ];
 
   const bottomMenuItems = [
@@ -32,12 +32,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 no-print">
         <Link href="/dashboard" className="flex items-center gap-2">
           <h1 className="text-2xl font-semibold tracking-tight text-primary">predicTo</h1>
         </Link>
       </SidebarHeader>
-      <SidebarContent className="p-4">
+      <SidebarContent className="p-4 no-print">
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
@@ -53,7 +53,7 @@ export function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 no-print">
         <SidebarSeparator className="mb-4" />
         <SidebarMenu>
           {bottomMenuItems.map((item) => (

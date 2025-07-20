@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock } from 'lucide-react';
+import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { predictDemandFromCsv, type PredictDemandFromCsvOutput } from '@/ai/flows/predict-demand-from-csv';
 import { Skeleton } from '../ui/skeleton';
 import { PredictionChart } from './prediction-chart';
+import { useRouter } from 'next/navigation';
 
 export default function UploadClient() {
   const [file, setFile] = useState<File | null>(null);
@@ -17,6 +18,7 @@ export default function UploadClient() {
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState<PredictDemandFromCsvOutput | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -25,6 +27,7 @@ export default function UploadClient() {
         setFile(selectedFile);
         setFileName(selectedFile.name);
         setPrediction(null);
+        sessionStorage.removeItem('predictionReport');
       } else {
         toast({
           variant: 'destructive',
@@ -47,6 +50,7 @@ export default function UploadClient() {
 
     setLoading(true);
     setPrediction(null);
+    sessionStorage.removeItem('predictionReport');
 
     try {
       const reader = new FileReader();
@@ -56,6 +60,7 @@ export default function UploadClient() {
           try {
             const result = await predictDemandFromCsv({ csvData });
             setPrediction(result);
+            sessionStorage.setItem('predictionReport', JSON.stringify(result));
           } catch (error) {
             console.error('Prediction failed:', error);
             toast({
@@ -109,6 +114,7 @@ export default function UploadClient() {
       {loading && <PredictionSkeleton />}
 
       {prediction && (
+        <>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
              {prediction.chartData && <PredictionChart data={prediction.chartData} />}
@@ -161,6 +167,19 @@ export default function UploadClient() {
             </div>
           </div>
         </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>View Full Report</CardTitle>
+                <CardDescription>A detailed report has been generated based on this analysis. You can view it on the Reports page.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Button onClick={() => router.push('/reports')}>
+                    <FileText className="mr-2 h-4 w-4"/>
+                    View Report
+                </Button>
+            </CardContent>
+        </Card>
+        </>
       )}
     </div>
   );
