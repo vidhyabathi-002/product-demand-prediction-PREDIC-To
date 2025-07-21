@@ -21,9 +21,9 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/analytics"],
-  "Marketing Team": ["/dashboard", "/analytics", "/reports"],
-  "Data Scientist": ["/dashboard", "/external-data", "/reports", "/analytics"],
+  "Product Manager": ["/dashboard", "/analytics", "/reports"],
+  "Marketing Team": ["/dashboard", "/analytics"],
+  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports"],
   "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics"],
 };
 
