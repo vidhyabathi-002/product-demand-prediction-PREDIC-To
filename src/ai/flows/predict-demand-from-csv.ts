@@ -40,24 +40,31 @@ export type PredictDemandFromCsvOutput = z.infer<typeof PredictDemandFromCsvOutp
 export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Promise<PredictDemandFromCsvOutput> {
   const { csvData } = input;
   const lines = csvData.trim().split('\n');
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-  const monthIndex = headers.indexOf('month');
-  const salesIndex = headers.indexOf('sales');
-
-  if (monthIndex === -1 || salesIndex === -1) {
-    throw new Error("CSV must contain 'Month' and 'Sales' columns.");
-  }
-
+  
+  // Make parsing more robust: assume first column is month, second is sales.
   const salesData = lines.slice(1).map(line => {
     const values = line.split(',');
+    // Basic validation to ensure we have at least two columns.
+    if (values.length < 2) {
+      return null;
+    }
+    const salesValue = parseInt(values[1].trim(), 10);
     return {
-      month: values[monthIndex].trim(),
-      sales: parseInt(values[salesIndex].trim(), 10),
+      month: values[0].trim(),
+      sales: isNaN(salesValue) ? 0 : salesValue,
     };
-  }).filter(d => !isNaN(d.sales));
+  }).filter(d => d !== null) as { month: string, sales: number }[];
+
+  if (salesData.length === 0) {
+    throw new Error("Could not parse valid sales data from the CSV.");
+  }
 
   const historicalData = salesData.slice(-6);
   const n = historicalData.length;
+  if (n === 0) {
+    throw new Error("Not enough historical data to make a prediction.");
+  }
+
 
   // Simulate a more complex model (like ARIMA) by incorporating trend and seasonality.
   // 1. Calculate base trend (similar to linear regression)
