@@ -43,7 +43,7 @@ body {
     --sidebar-ring: 217 91% 60%;
   }
   .dark {
-    --background: 0 0% 0%;
+    --background: 224 71% 4%;
     --foreground: 210 40% 98%;
     --card: 224 71% 4%;
     --card-foreground: 210 40% 98%;
@@ -67,7 +67,7 @@ body {
     --chart-3: 160 60% 45%;
     --chart-4: 30 80% 55%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 0 0% 0%;
+    --sidebar-background: 224 71% 4%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 196 81% 74%;
     --sidebar-primary-foreground: 224 71% 4%;
