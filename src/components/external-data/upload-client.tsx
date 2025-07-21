@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu } from 'lucide-react';
+import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,7 @@ const models: { id: ModelType; label: string; description: string }[] = [
 
 export default function UploadClient() {
   const [file, setFile] = useState<File | null>(null);
+  const [csvString, setCsvString] = useState<string>('');
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState<PredictDemandFromCsvOutput | null>(null);
@@ -38,7 +39,15 @@ export default function UploadClient() {
         setFile(selectedFile);
         setFileName(selectedFile.name);
         setPrediction(null);
+        
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const text = e.target?.result as string;
+            setCsvString(text);
+        };
+        reader.readAsText(selectedFile);
         sessionStorage.removeItem('predictionReport');
+
       } else {
         toast({
           variant: 'destructive',
@@ -49,12 +58,34 @@ export default function UploadClient() {
     }
   };
 
+  const loadSampleData = async () => {
+    try {
+        const response = await fetch('/sample-sales-data.csv');
+        const text = await response.text();
+        setCsvString(text);
+        setFile(new File([text], "sample-sales-data.csv", { type: "text/csv" }));
+        setFileName("sample-sales-data.csv");
+        setPrediction(null);
+        sessionStorage.removeItem('predictionReport');
+         toast({
+          title: 'Sample Data Loaded',
+          description: 'The sample sales data has been loaded. You can now predict demand.',
+        });
+    } catch (error) {
+         toast({
+          variant: 'destructive',
+          title: 'Failed to Load Sample',
+          description: 'Could not load the sample dataset.',
+        });
+    }
+  }
+
   const handleUpload = async () => {
-    if (!file) {
+    if (!csvString) {
       toast({
         variant: 'destructive',
-        title: 'No File Selected',
-        description: 'Please select a CSV file to upload.',
+        title: 'No Data',
+        description: 'Please select a CSV file or load the sample data.',
       });
       return;
     }
@@ -64,35 +95,18 @@ export default function UploadClient() {
     sessionStorage.removeItem('predictionReport');
 
     try {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const csvData = e.target?.result as string;
-        if (csvData) {
-          try {
-            const result = await predictDemandFromCsv({ csvData, model: selectedModel });
-            setPrediction(result);
-            sessionStorage.setItem('predictionReport', JSON.stringify(result));
-          } catch (error) {
-            console.error('Prediction failed:', error);
-            toast({
-              variant: 'destructive',
-              title: 'Prediction Failed',
-              description: 'Could not get a prediction from the local model.',
-            });
-          } finally {
-            setLoading(false);
-          }
-        }
-      };
-      reader.readAsText(file);
+        const result = await predictDemandFromCsv({ csvData: csvString, model: selectedModel });
+        setPrediction(result);
+        sessionStorage.setItem('predictionReport', JSON.stringify(result));
     } catch (error) {
-      console.error('File reading failed:', error);
-      toast({
+        console.error('Prediction failed:', error);
+        toast({
         variant: 'destructive',
-        title: 'File Read Error',
-        description: 'There was an issue reading your file.',
-      });
-      setLoading(false);
+        title: 'Prediction Failed',
+        description: (error as Error).message || 'Could not get a prediction from the model.',
+        });
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -109,13 +123,18 @@ export default function UploadClient() {
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label>1. Upload Sales Data</Label>
-              <Input id="file-upload" type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
-              <Button asChild variant="outline" className="w-full">
-                <label htmlFor="file-upload" className="cursor-pointer flex items-center gap-2">
-                  <Upload className="h-4 w-4" />
-                  <span>{fileName || 'Choose a CSV file...'}</span>
-                </label>
-              </Button>
+              <div className="flex gap-2">
+                <Input id="file-upload" type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
+                <Button asChild variant="outline" className="w-full">
+                    <label htmlFor="file-upload" className="cursor-pointer flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    <span>{fileName || 'Choose CSV...'}</span>
+                    </label>
+                </Button>
+                <Button onClick={loadSampleData} variant="secondary" title="Load Sample Data">
+                    <TestTube2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div className="space-y-4">
               <Label>2. Select ML Model</Label>
@@ -131,7 +150,7 @@ export default function UploadClient() {
                 ))}
               </RadioGroup>
             </div>
-            <Button onClick={handleUpload} disabled={!file || loading} className="w-full">
+            <Button onClick={handleUpload} disabled={!csvString || loading} className="w-full">
               {loading ? 'Analyzing...' : 'Predict Demand'}
             </Button>
           </CardContent>
@@ -147,7 +166,7 @@ export default function UploadClient() {
                         </div>
                         <h3 className="text-xl font-semibold">Ready to Forecast</h3>
                         <p className="text-muted-foreground mt-2">
-                            Upload your data and select a model to see your demand prediction here.
+                            Upload your data or load the sample to see your demand prediction here.
                         </p>
                     </div>
                 </Card>
