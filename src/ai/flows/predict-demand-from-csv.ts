@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -43,18 +44,23 @@ export type PredictDemandFromCsvOutput = z.infer<typeof PredictDemandFromCsvOutp
 export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Promise<PredictDemandFromCsvOutput> {
   const { csvData, model } = input;
   const lines = csvData.trim().split('\n');
+  const header = lines[0].split(',').map(h => h.trim());
   
+  // Find the index of the month and sales columns, assuming they are the first two.
+  const monthIndex = 0;
+  const salesIndex = 1;
+
   const salesData = lines.slice(1).map(line => {
     const values = line.split(',');
     if (values.length < 2) {
       return null;
     }
-    const salesValue = parseInt(values[1].trim(), 10);
+    const salesValue = parseInt(values[salesIndex].trim(), 10);
     return {
-      month: values[0].trim(),
+      month: values[monthIndex].trim(),
       sales: isNaN(salesValue) ? 0 : salesValue,
     };
-  }).filter(d => d !== null) as { month: string, sales: number }[];
+  }).filter(d => d !== null && d.sales > 0) as { month: string, sales: number }[];
 
   if (salesData.length === 0) {
     throw new Error("Could not parse valid sales data from the CSV.");
@@ -120,6 +126,7 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
     ...historicalData.map(d => ({ month: d.month, historical: d.sales, predicted: 0 })),
     ...forecastData.map(d => ({ month: d.month, historical: 0, predicted: d.predicted })),
   ];
+  // To connect the lines, the last historical point should also be the first prediction point.
   if (chartData.length > n && n > 0) {
     chartData[n-1].predicted = chartData[n-1].historical;
   }
