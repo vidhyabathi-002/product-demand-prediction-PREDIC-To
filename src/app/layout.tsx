@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: 'predicTo',
   },
   description: 'Predict product demand for new launches using data science.',
-  icons: null,
+  icons: {},
 };
 
 export default function RootLayout({
