@@ -9,8 +9,7 @@
  * - GeneratePromotionalTextOutput - The return type for the generatePromotionalText function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 const GeneratePromotionalTextInputSchema = z.object({
   predictedDemand: z
@@ -34,33 +33,19 @@ export type GeneratePromotionalTextOutput = z.infer<
   typeof GeneratePromotionalTextOutputSchema
 >;
 
+/**
+ * Mocks the generation of promotional text.
+ * @param input The promotional text generation input.
+ * @returns A mock promotional text.
+ */
 export async function generatePromotionalText(
   input: GeneratePromotionalTextInput
 ): Promise<GeneratePromotionalTextOutput> {
-  return generatePromotionalTextFlow(input);
+  // This is a mock implementation that returns a static promotional text.
+  // In a real application, this would use an AI model to generate text.
+  console.log('Generating promotional text for:', input);
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+  return {
+    promotionalText: `Unleash your productivity with the new PowerBook Pro! Featuring a stunning 4K display, an incredible 12-hour battery life, and powerful AI features, it's the ultimate tool for young professionals and tech enthusiasts. Pre-order now and get a free wireless mouse! #PowerBookPro #Tech #Productivity`,
+  };
 }
-
-const generatePromotionalTextPrompt = ai.definePrompt({
-  name: 'generatePromotionalTextPrompt',
-  input: {schema: GeneratePromotionalTextInputSchema},
-  output: {schema: GeneratePromotionalTextOutputSchema},
-  prompt: `You are an expert marketing copywriter. Based on the predicted demand, target demographics, and product description, generate a compelling promotional text. The text should be engaging and tailored to the specified audience, while highlighting the product's key features.
-
-Predicted Demand: {{{predictedDemand}}}
-Target Demographics: {{{targetDemographics}}}
-Product Description: {{{productDescription}}}
-
-Return a single, well-formatted promotional text.`,
-});
-
-const generatePromotionalTextFlow = ai.defineFlow(
-  {
-    name: 'generatePromotionalTextFlow',
-    inputSchema: GeneratePromotionalTextInputSchema,
-    outputSchema: GeneratePromotionalTextOutputSchema,
-  },
-  async input => {
-    const {output} = await generatePromotionalTextPrompt(input);
-    return output!;
-  }
-);
