@@ -60,8 +60,8 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
 
   // Simple linear regression (y = a + bx)
   const sumX = (n * (n - 1)) / 2;
-  const sumY = historicalData.reduce((acc, val) => acc + val.sales, 0);
-  const sumXY = historicalData.reduce((acc, val, i) => acc + i * val.sales, 0);
+  const sumY = historicalData.reduce((acc, d) => acc + d.sales, 0);
+  const sumXY = historicalData.reduce((acc, d, i) => acc + i * d.sales, 0);
   const sumXX = (n * (n - 1) * (2 * n - 1)) / 6;
 
   const b = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
@@ -81,12 +81,15 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
     ...forecastData.map(d => ({ month: d.month, historical: 0, predicted: d.predicted })),
   ];
   // Smooth graph transition
-  chartData[n - 1].predicted = chartData[n - 1].historical;
+  if (chartData.length > n) {
+    chartData[n-1].predicted = chartData[n-1].historical;
+  }
+  
 
   const predictedUnits = forecastData.reduce((sum, item) => sum + item.predicted, 0);
   const salesTrend = b > 0 ? 'Increasing' : 'Decreasing';
   
-  const peak = forecastData.reduce((max, item) => item.predicted > max.predicted ? item : max, forecastData[0]);
+  const peak = forecastData.reduce((max, item) => item.predicted > max.predicted ? item : max, forecastData[0] || { month: 'N/A', predicted: 0 });
   const peakDemandPeriod = peak.month;
 
   const summary = `Based on historical data, the sales trend is ${salesTrend.toLowerCase()}. The forecast for the next six months predicts total sales of approximately ${predictedUnits.toLocaleString()} units, with demand expected to peak in ${peakDemandPeriod}.`;
