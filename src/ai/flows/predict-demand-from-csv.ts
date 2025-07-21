@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -70,7 +71,7 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
   // Simulate a more complex model (like ARIMA) by incorporating trend and seasonality.
   const sumY = historicalData.reduce((acc, d) => acc + d.sales, 0);
   const avgSales = sumY / n;
-  const trend = (historicalData[n-1].sales - historicalData[0].sales) / (n -1);
+  const trend = n > 1 ? (historicalData[n-1].sales - historicalData[0].sales) / (n -1) : 0;
 
   // Model-specific parameters
   let seasonalityFactor = 0.1;
