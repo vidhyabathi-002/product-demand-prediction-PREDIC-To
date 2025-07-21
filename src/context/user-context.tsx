@@ -62,15 +62,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     if (!user && !pathIsPublic) {
       router.push('/login');
-    } else if (user && pathIsPublic) {
-        router.push('/dashboard')
-    } else if (user && !pathIsPublic) {
+    } else if (user) {
+      if (pathIsPublic) {
+        router.push('/dashboard');
+      } else {
         const allowedRoutes = navConfig[user.role];
         const currentRoute = '/' + pathname.split('/')[1]; // get base route
         if (!allowedRoutes.includes(currentRoute)) {
-            // If not allowed, redirect to their default page
             router.push(allowedRoutes[0] || '/dashboard');
         }
+      }
     }
   }, [user, loading, pathname, router]);
 
