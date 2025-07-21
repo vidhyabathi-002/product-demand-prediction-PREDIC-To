@@ -10,8 +10,11 @@
 
 import {z} from 'zod';
 
+export type ModelType = "ARIMA" | "Prophet" | "LSTM" | "Random Forest" | "XGBoost";
+
 const PredictDemandFromCsvInputSchema = z.object({
   csvData: z.string().describe('The CSV data as a string.'),
+  model: z.enum(["ARIMA", "Prophet", "LSTM", "Random Forest", "XGBoost"]).describe('The machine learning model to use for the prediction.')
 });
 export type PredictDemandFromCsvInput = z.infer<typeof PredictDemandFromCsvInputSchema>;
 
@@ -34,17 +37,15 @@ export type PredictDemandFromCsvOutput = z.infer<typeof PredictDemandFromCsvOutp
 /**
  * Parses CSV data and performs a simple linear regression to forecast demand.
  * This function simulates a local ML model to remove the dependency on external AI APIs.
- * @param input The CSV data.
+ * @param input The CSV data and selected model.
  * @returns A demand forecast.
  */
 export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Promise<PredictDemandFromCsvOutput> {
-  const { csvData } = input;
+  const { csvData, model } = input;
   const lines = csvData.trim().split('\n');
   
-  // Make parsing more robust: assume first column is month, second is sales.
   const salesData = lines.slice(1).map(line => {
     const values = line.split(',');
-    // Basic validation to ensure we have at least two columns.
     if (values.length < 2) {
       return null;
     }
@@ -67,19 +68,45 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
 
 
   // Simulate a more complex model (like ARIMA) by incorporating trend and seasonality.
-  // 1. Calculate base trend (similar to linear regression)
   const sumY = historicalData.reduce((acc, d) => acc + d.sales, 0);
   const avgSales = sumY / n;
   const trend = (historicalData[n-1].sales - historicalData[0].sales) / (n -1);
 
-  // 2. Simulate seasonality (e.g., a simple sine wave for this mock)
-  const seasonalityFactor = 0.1; // 10% swing due to seasonality
+  // Model-specific parameters
+  let seasonalityFactor = 0.1;
+  let trendWeight = 1.0;
+  let noiseLevel = 0.05;
+  let confidence = "Medium";
+
+  switch(model) {
+      case "Prophet":
+          seasonalityFactor = 0.25; // Prophet is good with seasonality
+          confidence = "High";
+          break;
+      case "LSTM":
+          trendWeight = 1.2; // LSTMs can capture recent trends well
+          noiseLevel = 0.08;
+          confidence = "Medium";
+          break;
+      case "Random Forest":
+      case "XGBoost":
+          // Ensemble methods are often more stable
+          noiseLevel = 0.03;
+          seasonalityFactor = 0.15;
+          confidence = "High";
+          break;
+      case "ARIMA":
+      default:
+          // Keep default parameters
+          break;
+  }
+
 
   const forecastMonths = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const forecastData = forecastMonths.map((month, i) => {
-    const trendValue = historicalData[n-1].sales + trend * (i + 1);
+    const trendValue = historicalData[n-1].sales + (trend * trendWeight) * (i + 1);
     const seasonalValue = avgSales * seasonalityFactor * Math.sin((Math.PI * i) / (forecastMonths.length -1));
-    const randomNoise = (Math.random() - 0.5) * (avgSales * 0.05); // +/- 2.5% random noise
+    const randomNoise = (Math.random() - 0.5) * (avgSales * noiseLevel);
     
     const prediction = Math.max(0, Math.round(trendValue + seasonalValue + randomNoise));
 
@@ -93,7 +120,6 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
     ...historicalData.map(d => ({ month: d.month, historical: d.sales, predicted: 0 })),
     ...forecastData.map(d => ({ month: d.month, historical: 0, predicted: d.predicted })),
   ];
-  // Smooth graph transition
   if (chartData.length > n && n > 0) {
     chartData[n-1].predicted = chartData[n-1].historical;
   }
@@ -105,15 +131,15 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
   const peak = forecastData.reduce((max, item) => item.predicted > max.predicted ? item : max, forecastData[0] || { month: 'N/A', predicted: 0 });
   const peakDemandPeriod = peak.month;
 
-  const summary = `Using a simulated ARIMA model, the forecast accounts for both overall trend and seasonal variations. The sales trend is ${salesTrend.toLowerCase()}, with total predicted sales of approximately ${predictedUnits.toLocaleString()} units. Demand is expected to peak in ${peakDemandPeriod}.`;
+  const summary = `Using a simulated ${model} model, the forecast accounts for trend and seasonal variations. The sales trend is ${salesTrend.toLowerCase()}, with total predicted sales of approximately ${predictedUnits.toLocaleString()} units. Demand is expected to peak in ${peakDemandPeriod}.`;
 
   return {
     summary,
     predictedUnits,
-    confidence: 'Medium', // Mock confidence level
+    confidence: confidence,
     salesTrend,
     peakDemandPeriod,
     chartData,
-    modelUsed: "Simulated ARIMA",
+    modelUsed: `Simulated ${model}`,
   };
 }
