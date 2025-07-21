@@ -9,29 +9,15 @@
  * - GeneratePromotionalTextOutput - The return type for the generatePromotionalText function.
  */
 
-import {z} from 'zod';
+export interface GeneratePromotionalTextInput {
+  predictedDemand: string;
+  targetDemographics: string;
+  productDescription: string;
+}
 
-const GeneratePromotionalTextInputSchema = z.object({
-  predictedDemand: z
-    .string()
-    .describe('The predicted demand for the product (e.g., High, Medium, Low).'),
-  targetDemographics: z
-    .string()
-    .describe('The target demographics for the product (e.g., Young Adults, Professionals).'),
-  productDescription: z.string().describe('A description of the product.'),
-});
-export type GeneratePromotionalTextInput = z.infer<
-  typeof GeneratePromotionalTextInputSchema
->;
-
-const GeneratePromotionalTextOutputSchema = z.object({
-  promotionalText: z
-    .string()
-    .describe('The generated promotional text variations.'),
-});
-export type GeneratePromotionalTextOutput = z.infer<
-  typeof GeneratePromotionalTextOutputSchema
->;
+export interface GeneratePromotionalTextOutput {
+  promotionalText: string;
+}
 
 /**
  * Mocks the generation of promotional text.

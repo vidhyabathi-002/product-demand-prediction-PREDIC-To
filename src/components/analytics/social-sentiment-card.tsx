@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -90,8 +91,8 @@ export function SocialSentimentCard() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card className="lg:col-span-1 flex flex-col">
+    <div className="grid grid-cols-1 gap-6">
+      <Card className="flex flex-col">
         <CardHeader>
           <div className="flex items-start gap-4">
             <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
@@ -106,7 +107,7 @@ export function SocialSentimentCard() {
           </div>
         </CardHeader>
         <CardContent className="flex-grow space-y-4 flex flex-col">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="product-name">Product Name</Label>
               <Input
@@ -129,7 +130,7 @@ export function SocialSentimentCard() {
             <Label htmlFor="social-media-posts">Social Media Posts Data</Label>
             <Textarea
               id="social-media-posts"
-              className="flex-grow resize-none"
+              className="min-h-[200px] flex-grow resize-none"
               value={socialMediaPosts}
               onChange={(e) => setSocialMediaPosts(e.target.value)}
             />
@@ -141,7 +142,7 @@ export function SocialSentimentCard() {
           </div>
         </CardContent>
       </Card>
-      <div className="lg:col-span-2 space-y-6">
+      <div className="space-y-6">
           {loading && <AnalysisSkeleton />}
           
           {analysisResult && (
@@ -208,3 +209,5 @@ function AnalysisSkeleton() {
         </div>
     )
 }
+
+    
