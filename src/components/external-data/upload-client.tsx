@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText } from 'lucide-react';
+import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -66,7 +66,7 @@ export default function UploadClient() {
             toast({
               variant: 'destructive',
               title: 'Prediction Failed',
-              description: 'Could not get a prediction from the AI model.',
+              description: 'Could not get a prediction from the local model.',
             });
           } finally {
             setLoading(false);
@@ -164,6 +164,15 @@ export default function UploadClient() {
                   </div>
                 <p className="text-2xl font-bold">{prediction.confidence}</p>
               </Card>
+              {prediction.modelUsed && (
+                <Card className="p-4 sm:col-span-2 lg:col-span-1">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Cpu className="h-5 w-5 text-primary" />
+                      <span className="text-sm">Model Used</span>
+                    </div>
+                  <p className="text-2xl font-bold">{prediction.modelUsed}</p>
+                </Card>
+              )}
             </div>
           </div>
         </div>

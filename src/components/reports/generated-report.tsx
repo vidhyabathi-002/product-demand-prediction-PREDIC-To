@@ -2,7 +2,7 @@
 'use client';
 import type { PredictDemandFromCsvOutput } from "@/ai/flows/predict-demand-from-csv";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock } from "lucide-react";
+import { BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, Cpu } from "lucide-react";
 import { PredictionChart } from "../external-data/prediction-chart";
 import { Separator } from "../ui/separator";
 
@@ -20,8 +20,18 @@ export function GeneratedReport({ data }: GeneratedReportProps) {
   return (
     <Card className="p-4 sm:p-6 md:p-8 print:shadow-none print:border-none">
         <CardHeader className="border-b pb-6 mb-6">
-            <CardTitle className="text-4xl font-bold text-primary">Demand Forecast Report</CardTitle>
-            <CardDescription>Generated on: {reportDate}</CardDescription>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-4xl font-bold text-primary">Demand Forecast Report</CardTitle>
+                <CardDescription>Generated on: {reportDate}</CardDescription>
+              </div>
+              {data.modelUsed && (
+                <div className="text-right">
+                    <p className="text-sm font-semibold text-muted-foreground flex items-center gap-2"><Cpu className="h-4 w-4 text-primary" /> Model Used</p>
+                    <p className="text-lg font-bold">{data.modelUsed}</p>
+                </div>
+              )}
+            </div>
         </CardHeader>
         <CardContent className="space-y-8">
             <div className="prose prose-lg max-w-none dark:prose-invert">
