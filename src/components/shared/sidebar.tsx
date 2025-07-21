@@ -33,21 +33,28 @@ const allMenuItems = [
 
 const AppLogo = () => (
     <svg
-      width="32"
-      height="32"
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="text-primary"
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="text-primary"
     >
-      <rect width="32" height="32" rx="8" fill="currentColor" />
-      <path
-        d="M22.5 12.5C24.5 14.5 24.5 17.5 22.5 19.5L16 26L9.5 19.5C7.5 17.5 7.5 14.5 9.5 12.5C11.5 10.5 14.5 10.5 16.5 12.5L16 13L15.5 12.5C17.5 10.5 20.5 10.5 22.5 12.5Z"
-        stroke="hsl(var(--primary-foreground))"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+        <rect width="32" height="32" rx="8" fill="currentColor" />
+        <path
+            d="M8 20L14 14L18 18L24 12"
+            stroke="hsl(var(--primary-foreground))"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+        <path
+            d="M19 12H24V17"
+            stroke="hsl(var(--primary-foreground))"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
     </svg>
 );
 
