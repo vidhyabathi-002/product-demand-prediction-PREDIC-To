@@ -1,15 +1,14 @@
 'use server';
 
 /**
- * @fileOverview Predicts product demand based on CSV data.
+ * @fileOverview Predicts product demand based on CSV data using a local model.
  *
  * - predictDemandFromCsv - A function that handles the demand prediction process from a CSV file.
  * - PredictDemandFromCsvInput - The input type for the predictDemandFromCsv function.
  * - PredictDemandFromCsvOutput - The return type for the predictDemandFromCsv function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 const PredictDemandFromCsvInputSchema = z.object({
   csvData: z.string().describe('The CSV data as a string.'),
@@ -30,42 +29,74 @@ const PredictDemandFromCsvOutputSchema = z.object({
 });
 export type PredictDemandFromCsvOutput = z.infer<typeof PredictDemandFromCsvOutputSchema>;
 
+
+/**
+ * Parses CSV data and performs a simple linear regression to forecast demand.
+ * This function simulates a local ML model to remove the dependency on external AI APIs.
+ * @param input The CSV data.
+ * @returns A demand forecast.
+ */
 export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Promise<PredictDemandFromCsvOutput> {
-  return predictDemandFromCsvFlow(input);
-}
+  const { csvData } = input;
+  const lines = csvData.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const monthIndex = headers.indexOf('month');
+  const salesIndex = headers.indexOf('sales');
 
-const prompt = ai.definePrompt({
-  name: 'predictDemandFromCsvPrompt',
-  input: {schema: PredictDemandFromCsvInputSchema},
-  output: {schema: PredictDemandFromCsvOutputSchema},
-  prompt: `You are a data scientist specializing in demand forecasting. Analyze the following sales data from a CSV file for a single product. The CSV will have 'Month' and 'Sales' columns.
-
-  Your tasks are:
-  1. Extract the last 6 months of historical data.
-  2. Predict the future demand for the next six months based on the historical data.
-  3. Provide a concise summary of your findings.
-  4. Determine if the overall sales trend for the forecast period is 'Increasing' or 'Decreasing'.
-  5. Identify the month with the highest predicted sales, and return this as the 'peakDemandPeriod'.
-  6. Provide the total predicted number of units to be sold over the next 6 months.
-  7. Provide your confidence level in this prediction.
-  8. Return a 'chartData' array containing 12 months of data: the last 6 months of historical data and the 6 months of forecasted data.
-    - For historical months, 'historical' should be the sales number and 'predicted' should be 0.
-    - For forecasted months, 'historical' should be 0 and 'predicted' should be the forecasted number.
-    - The final predicted value for the last historical month should also be populated in the 'predicted' field for a smoother graph transition.
-
-  CSV Data:
-  {{{csvData}}}
-  `,
-});
-
-const predictDemandFromCsvFlow = ai.defineFlow(
-  {
-    name: 'predictDemandFromCsvFlow',
-    inputSchema: PredictDemandFromCsvInputSchema,
-    outputSchema: PredictDemandFromCsvOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  if (monthIndex === -1 || salesIndex === -1) {
+    throw new Error("CSV must contain 'Month' and 'Sales' columns.");
   }
-);
+
+  const salesData = lines.slice(1).map(line => {
+    const values = line.split(',');
+    return {
+      month: values[monthIndex].trim(),
+      sales: parseInt(values[salesIndex].trim(), 10),
+    };
+  }).filter(d => !isNaN(d.sales));
+
+  const historicalData = salesData.slice(-6);
+  const n = historicalData.length;
+
+  // Simple linear regression (y = a + bx)
+  const sumX = (n * (n - 1)) / 2;
+  const sumY = historicalData.reduce((acc, val) => acc + val.sales, 0);
+  const sumXY = historicalData.reduce((acc, val, i) => acc + i * val.sales, 0);
+  const sumXX = (n * (n - 1) * (2 * n - 1)) / 6;
+
+  const b = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+  const a = (sumY - b * sumX) / n;
+
+  const forecastMonths = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const forecastData = forecastMonths.map((month, i) => {
+    const prediction = Math.max(0, Math.round(a + b * (n + i)));
+    return {
+      month,
+      predicted: prediction,
+    };
+  });
+
+  const chartData: PredictDemandFromCsvOutput['chartData'] = [
+    ...historicalData.map(d => ({ month: d.month, historical: d.sales, predicted: 0 })),
+    ...forecastData.map(d => ({ month: d.month, historical: 0, predicted: d.predicted })),
+  ];
+  // Smooth graph transition
+  chartData[n - 1].predicted = chartData[n - 1].historical;
+
+  const predictedUnits = forecastData.reduce((sum, item) => sum + item.predicted, 0);
+  const salesTrend = b > 0 ? 'Increasing' : 'Decreasing';
+  
+  const peak = forecastData.reduce((max, item) => item.predicted > max.predicted ? item : max, forecastData[0]);
+  const peakDemandPeriod = peak.month;
+
+  const summary = `Based on historical data, the sales trend is ${salesTrend.toLowerCase()}. The forecast for the next six months predicts total sales of approximately ${predictedUnits.toLocaleString()} units, with demand expected to peak in ${peakDemandPeriod}.`;
+
+  return {
+    summary,
+    predictedUnits,
+    confidence: 'Medium', // Mock confidence level
+    salesTrend,
+    peakDemandPeriod,
+    chartData,
+  };
+}
