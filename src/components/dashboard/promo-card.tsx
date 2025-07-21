@@ -1,4 +1,4 @@
-// src/components/dashboard/promo-card.tsx
+
 'use client';
 
 import { useState } from "react";
