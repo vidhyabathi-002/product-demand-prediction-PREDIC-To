@@ -1,3 +1,4 @@
+
 // src/context/user-context.tsx
 'use client';
 
@@ -23,7 +24,7 @@ const navConfig = {
   "Product Manager": ["/dashboard", "/analytics"],
   "Marketing Team": ["/dashboard", "/analytics", "/reports"],
   "Data Scientist": ["/dashboard", "/external-data", "/reports", "/analytics"],
-  "Administrator": ["/dashboard", "/external-data", "/reports", "/analytics"],
+  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics"],
 };
 
 export function UserProvider({ children }: { children: ReactNode }) {

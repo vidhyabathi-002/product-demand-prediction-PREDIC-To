@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, PieChart, FileText, Home, LogOut, UploadCloud } from "lucide-react";
+import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -21,11 +21,12 @@ const navConfig = {
   "Product Manager": ["/dashboard", "/analytics"],
   "Marketing Team": ["/dashboard", "/analytics", "/reports"],
   "Data Scientist": ["/dashboard", "/external-data", "/reports", "/analytics"],
-  "Administrator": ["/dashboard", "/external-data", "/reports", "/analytics"],
+  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics"],
 };
 
 const allMenuItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/admin", label: "User Management", icon: Users },
     { href: "/external-data", label: "External Data", icon: UploadCloud },
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/analytics", label: "Analytics", icon: PieChart },
