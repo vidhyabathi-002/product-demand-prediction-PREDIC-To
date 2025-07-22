@@ -1,6 +1,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "../ui/button";
@@ -32,7 +33,7 @@ export function AppHeader() {
     router.push('/login');
   }
 
-  const avatarUrl = user ? roleAvatars[user.role] : 'https://placehold.co/150x150.png';
+  const avatarUrl = user?.avatar || (user ? roleAvatars[user.role] : 'https://placehold.co/150x150.png');
   const avatarHint = user ? roleAvatarHints[user.role] : 'abstract logo';
   
   return (
@@ -50,7 +51,7 @@ export function AppHeader() {
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={avatarUrl} alt={user?.role} data-ai-hint={avatarHint} />
-                <AvatarFallback>{user?.name?.[0] ?? 'U'}</AvatarFallback>
+                <AvatarFallback>{user?.name?.[0]?.toUpperCase() ?? 'U'}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -59,12 +60,14 @@ export function AppHeader() {
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user?.name}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {user?.role}
+                  {user?.email}
                 </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/profile">Profile</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>

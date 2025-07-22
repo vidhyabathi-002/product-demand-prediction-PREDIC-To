@@ -1,4 +1,3 @@
-
 // src/context/user-context.tsx
 'use client';
 
@@ -7,9 +6,11 @@ import { usePathname, useRouter } from 'next/navigation';
 
 export type UserRole = 'Product Manager' | 'Marketing Team' | 'Data Scientist' | 'Administrator';
 
-interface User {
+export interface User {
   name: string;
   role: UserRole;
+  email: string;
+  avatar?: string;
 }
 
 interface UserContextType {
@@ -24,7 +25,7 @@ const navConfig = {
   "Product Manager": ["/dashboard", "/analytics", "/reports"],
   "Marketing Team": ["/dashboard", "/analytics"],
   "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports"],
-  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics"],
+  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics", "/profile"],
 };
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -67,7 +68,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (pathIsPublic) {
         router.push('/dashboard');
       } else {
-        const allowedRoutes = navConfig[user.role];
+        const allowedRoutes = [...(navConfig[user.role] || []), '/profile']; // All users can access profile
         const currentRoute = '/' + pathname.split('/')[1]; // get base route
         if (!allowedRoutes.includes(currentRoute)) {
             router.push(allowedRoutes[0] || '/dashboard');

@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Users } from "lucide-react";
+import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Users, User } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -30,6 +30,7 @@ const allMenuItems = [
     { href: "/external-data", label: "External Data", icon: UploadCloud },
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/analytics", label: "Analytics", icon: PieChart },
+    { href: "/profile", label: "Profile", icon: User },
 ];
 
 const AppLogo = () => (
@@ -78,7 +79,7 @@ export function AppSidebar() {
     )
   }
 
-  const allowedRoutes = user?.role ? navConfig[user.role] : [];
+  const allowedRoutes = user?.role ? [...navConfig[user.role], '/profile'] : [];
   const menuItems = allMenuItems.filter(item => allowedRoutes.includes(item.href));
 
 

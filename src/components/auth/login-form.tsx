@@ -58,10 +58,12 @@ export function LoginForm() {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
     const role = formData.get('role') as UserRole;
+    const email = formData.get('email') as string;
     
     setUser({
         name: 'Demo User',
-        role: role || 'Product Manager'
+        role: role || 'Product Manager',
+        email: email || 'demo@example.com'
     });
     
     router.push('/dashboard');
@@ -86,6 +88,7 @@ export function LoginForm() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="m@example.com"
                 defaultValue="demo@example.com"
