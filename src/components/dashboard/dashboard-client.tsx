@@ -63,7 +63,7 @@ export default function DashboardClient({ children }: { children: ReactNode }) {
                         <div className="flex-1">
                             <CardTitle>Sales Performance</CardTitle>
                             <CardDescription>
-                                Dataset: Real-Time Sales Data. This chart tracks actual sales against projections.
+                                This chart tracks simulated sales against projections, updated in real-time based on the Demand Simulation panel.
                             </CardDescription>
                         </div>
                     </div>
