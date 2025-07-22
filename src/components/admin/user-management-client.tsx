@@ -3,6 +3,8 @@
 
 import { useState } from "react";
 import type { UserRole } from "@/context/user-context";
+import { useUser } from "@/context/user-context";
+import { useActivityLog } from "@/context/activity-log-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -30,12 +32,30 @@ const allRoles: UserRole[] = ["Administrator", "Product Manager", "Marketing Tea
 
 export default function UserManagementClient() {
   const [users, setUsers] = useState<User[]>(initialUsers);
+  const { user: adminUser } = useUser();
+  const { addLog } = useActivityLog();
 
   const handleRoleChange = (userId: number, newRole: UserRole) => {
+    const userToUpdate = users.find(u => u.id === userId);
+    if (!userToUpdate || !adminUser) return;
+    
+    addLog({
+        user: adminUser.name,
+        action: 'Role Change',
+        details: `Changed ${userToUpdate.name}'s role from ${userToUpdate.role} to ${newRole}`
+    });
     setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
   };
   
   const handleStatusChange = (userId: number, newStatus: "Active" | "Inactive") => {
+     const userToUpdate = users.find(u => u.id === userId);
+     if (!userToUpdate || !adminUser) return;
+
+     addLog({
+        user: adminUser.name,
+        action: 'Status Change',
+        details: `${newStatus === 'Active' ? 'Activated' : 'Deactivated'} user ${userToUpdate.name}`
+    });
      setUsers(users.map(user => user.id === userId ? { ...user, status: newStatus } : user));
   }
 

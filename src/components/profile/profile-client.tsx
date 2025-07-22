@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@/context/user-context';
+import { useActivityLog } from '@/context/activity-log-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ import { Skeleton } from '../ui/skeleton';
 
 export default function ProfileClient() {
   const { user, setUser, loading } = useUser();
+  const { addLog } = useActivityLog();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState('');
@@ -46,12 +48,20 @@ export default function ProfileClient() {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (user) {
-      setUser({
+      const updatedUser = {
         ...user,
         name,
         email,
         avatar,
+      };
+      setUser(updatedUser);
+
+      addLog({
+        user: updatedUser.name,
+        action: 'Profile Update',
+        details: 'User updated their personal information.'
       });
+
       toast({
         title: 'Profile Updated',
         description: 'Your personal information has been saved.',
@@ -81,7 +91,7 @@ export default function ProfileClient() {
              <div className="flex items-center gap-6">
                 <div className="relative">
                     <Avatar className="h-24 w-24">
-                        <AvatarImage src={avatar} alt={name} />
+                        <AvatarImage src={avatar} alt={name || ''} />
                         <AvatarFallback>{name?.[0]?.toUpperCase() ?? 'U'}</AvatarFallback>
                     </Avatar>
                      <Button 
