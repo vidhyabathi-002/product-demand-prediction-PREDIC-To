@@ -22,8 +22,8 @@ export default function ProfileClient() {
 
   useEffect(() => {
     if (user) {
-      setName(user.name);
-      setEmail(user.email);
+      setName(user.name || '');
+      setEmail(user.email || '');
       setAvatar(user.avatar || '');
     }
   }, [user]);
@@ -112,7 +112,7 @@ export default function ProfileClient() {
                 <Label htmlFor="name">Full Name</Label>
                 <Input
                     id="name"
-                    value={name}
+                    value={name || ''}
                     onChange={(e) => setName(e.target.value)}
                     required
                 />
@@ -122,7 +122,7 @@ export default function ProfileClient() {
                 <Input
                     id="email"
                     type="email"
-                    value={email}
+                    value={email || ''}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                 />
