@@ -7,8 +7,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import { Bell } from "lucide-react";
+import { Bell, FileText } from "lucide-react";
 import { useUser, type UserRole } from "@/context/user-context";
+import { useNotification } from "@/context/notification-context";
+import { Badge } from "../ui/badge";
 
 const roleAvatars: Record<UserRole, string> = {
   'Product Manager': 'https://placehold.co/150x150/3B5998/FFFFFF.png',
@@ -27,6 +29,7 @@ const roleAvatarHints: Record<UserRole, string> = {
 export function AppHeader() {
   const { user, setUser } = useUser();
   const router = useRouter();
+  const { notifications, markAsRead } = useNotification();
 
   const handleLogout = () => {
     setUser(null);
@@ -35,6 +38,8 @@ export function AppHeader() {
 
   const avatarUrl = user?.avatar || (user ? roleAvatars[user.role] : 'https://placehold.co/150x150.png');
   const avatarHint = user ? roleAvatarHints[user.role] : 'abstract logo';
+
+  const unreadCount = notifications.filter(n => !n.read).length;
   
   return (
     <header className="flex h-16 items-center justify-between border-b bg-transparent px-4 sm:px-6 lg:px-8 sticky top-0 z-10 no-print">
@@ -42,10 +47,39 @@ export function AppHeader() {
         <SidebarTrigger className="md:hidden" />
       </div>
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Bell className="h-5 w-5" />
-          <span className="sr-only">Notifications</span>
-        </Button>
+        <DropdownMenu onOpenChange={(open) => { if (open && unreadCount > 0) markAsRead() }}>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full relative">
+                    {unreadCount > 0 && (
+                        <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 justify-center p-0">{unreadCount}</Badge>
+                    )}
+                    <Bell className="h-5 w-5" />
+                    <span className="sr-only">Notifications</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80" align="end">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {notifications.length === 0 ? (
+                    <DropdownMenuItem disabled>No new notifications</DropdownMenuItem>
+                ) : (
+                    notifications.map(notif => (
+                        <DropdownMenuItem key={notif.id} asChild className="cursor-pointer">
+                           <Link href={notif.href || '#'} className="flex gap-3 items-start">
+                            <div className="mt-1">
+                                <FileText className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="flex flex-col">
+                                <p className="font-semibold">{notif.title}</p>
+                                <p className="text-xs text-muted-foreground">{notif.message}</p>
+                            </div>
+                           </Link>
+                        </DropdownMenuItem>
+                    ))
+                )}
+            </DropdownMenuContent>
+        </DropdownMenu>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">

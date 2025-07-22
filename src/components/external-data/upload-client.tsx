@@ -13,6 +13,9 @@ import { PredictionChart } from './prediction-chart';
 import { useRouter } from 'next/navigation';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
+import { useNotification } from '@/context/notification-context';
+import { useActivityLog } from '@/context/activity-log-context';
+import { useUser } from '@/context/user-context';
 
 const models: { id: ModelType; label: string; description: string }[] = [
     { id: 'ARIMA', label: 'ARIMA', description: 'Good for stable trends and seasonality.' },
@@ -31,6 +34,9 @@ export default function UploadClient() {
   const [selectedModel, setSelectedModel] = useState<ModelType>('ARIMA');
   const { toast } = useToast();
   const router = useRouter();
+  const { addNotification } = useNotification();
+  const { addLog } = useActivityLog();
+  const { user } = useUser();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -98,6 +104,19 @@ export default function UploadClient() {
         const result = await predictDemandFromCsv({ csvData: csvString, model: selectedModel });
         setPrediction(result);
         sessionStorage.setItem('predictionReport', JSON.stringify(result));
+        addNotification({
+            title: 'Report Generated',
+            message: 'Your demand forecast report is now available.',
+            href: '/reports',
+        });
+        if (user) {
+            addLog({
+                user: user.name,
+                action: 'Generate Report',
+                details: `Generated demand forecast using ${selectedModel} model.`
+            })
+        }
+
     } catch (error) {
         console.error('Prediction failed:', error);
         toast({

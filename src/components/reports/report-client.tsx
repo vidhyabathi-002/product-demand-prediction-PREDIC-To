@@ -8,11 +8,17 @@ import { FileWarning, Download, UploadCloud } from 'lucide-react';
 import type { PredictDemandFromCsvOutput } from '@/ai/flows/predict-demand-from-csv';
 import { GeneratedReport } from './generated-report';
 import { useRouter } from 'next/navigation';
+import { useNotification } from '@/context/notification-context';
+import { useUser } from '@/context/user-context';
+import { useActivityLog } from '@/context/activity-log-context';
 
 export default function ReportClient() {
     const [reportData, setReportData] = useState<PredictDemandFromCsvOutput | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { addNotification } = useNotification();
+    const { user } = useUser();
+    const { addLog } = useActivityLog();
     
     useEffect(() => {
         const data = sessionStorage.getItem('predictionReport');
@@ -29,6 +35,17 @@ export default function ReportClient() {
 
     const handlePrint = () => {
       window.print();
+      addNotification({
+          title: 'Report Downloaded',
+          message: 'The demand forecast report has been sent to your printer.',
+      });
+      if (user) {
+        addLog({
+            user: user.name,
+            action: 'Download Report',
+            details: 'Downloaded the demand forecast report.'
+        })
+      }
     }
 
   if (loading) {
@@ -42,7 +59,7 @@ export default function ReportClient() {
 
   return (
     <div className="space-y-6">
-       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
         <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
             <p className="text-muted-foreground">Generated demand forecast report.</p>
@@ -58,7 +75,7 @@ export default function ReportClient() {
       {reportData ? (
         <GeneratedReport data={reportData} />
       ) : (
-        <Card className="bg-secondary/50">
+        <Card className="bg-secondary/50 no-print">
             <CardHeader>
             <CardTitle className='flex items-center gap-3'>
                 <FileWarning className="w-8 h-8 text-amber-500" />
