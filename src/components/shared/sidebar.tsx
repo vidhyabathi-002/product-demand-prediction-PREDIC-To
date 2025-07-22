@@ -30,7 +30,6 @@ const allMenuItems = [
     { href: "/external-data", label: "External Data", icon: UploadCloud },
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/analytics", label: "Analytics", icon: PieChart },
-    { href: "/profile", label: "Profile", icon: User },
 ];
 
 const AppLogo = () => (
@@ -79,7 +78,7 @@ export function AppSidebar() {
     )
   }
 
-  const allowedRoutes = user?.role ? [...navConfig[user.role], '/profile'] : [];
+  const allowedRoutes = user?.role ? navConfig[user.role] : [];
   const menuItems = allMenuItems.filter(item => allowedRoutes.includes(item.href));
 
 

@@ -23,10 +23,10 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/analytics", "/reports", "/profile"],
-  "Marketing Team": ["/dashboard", "/analytics", "/profile"],
-  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports", "/profile"],
-  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics", "/profile"],
+  "Product Manager": ["/dashboard", "/analytics", "/reports"],
+  "Marketing Team": ["/dashboard", "/analytics"],
+  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports"],
+  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics"],
 };
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -62,13 +62,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     const publicPaths = ['/login'];
     const pathIsPublic = publicPaths.includes(pathname);
+    const isProfilePage = pathname === '/profile';
 
     if (!user && !pathIsPublic) {
       router.push('/login');
     } else if (user) {
       if (pathIsPublic) {
         router.push('/dashboard');
-      } else {
+      } else if (!isProfilePage) {
         const allowedRoutes = navConfig[user.role] || [];
         const currentRoute = '/' + pathname.split('/')[1]; // get base route
         if (!allowedRoutes.includes(currentRoute)) {
