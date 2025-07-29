@@ -3,6 +3,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { useSettings } from './settings-context';
 
 export interface LogEntry {
   id: number;
@@ -25,6 +26,7 @@ const ActivityLogContext = createContext<ActivityLogContextType | undefined>(und
 export function ActivityLogProvider({ children }: { children: ReactNode }) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const { settings } = useSettings();
 
   useEffect(() => {
     try {
@@ -50,6 +52,8 @@ export function ActivityLogProvider({ children }: { children: ReactNode }) {
   }, [logs, isInitialized]);
 
   const addLog = (entry: NewLogEntry) => {
+    if (!settings.auditLogsEnabled) return;
+
     const newLog: LogEntry = {
       id: Date.now(),
       timestamp: new Date().toLocaleString(),

@@ -1,7 +1,9 @@
+
 "use client"
 
 // Inspired by react-hot-toast library
 import * as React from "react"
+import { useSettings } from "@/context/settings-context"
 
 import type {
   ToastActionElement,
@@ -172,6 +174,7 @@ function toast({ ...props }: Toast) {
 }
 
 function useToast() {
+  const { settings } = useSettings();
   const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {
@@ -184,9 +187,23 @@ function useToast() {
     }
   }, [state])
 
+  const customToast = React.useCallback(
+    (props: Toast) => {
+      if (settings.notificationsEnabled) {
+        return toast(props);
+      }
+      return {
+        id: '',
+        dismiss: () => {},
+        update: () => {},
+      };
+    },
+    [settings.notificationsEnabled]
+  );
+
   return {
     ...state,
-    toast,
+    toast: customToast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }

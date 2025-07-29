@@ -4,6 +4,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSettings } from './settings-context';
 
 export type UserRole = 'Product Manager' | 'Marketing Team' | 'Data Scientist' | 'Administrator';
 
@@ -35,6 +36,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { settings } = useSettings();
   
   useEffect(() => {
     setIsClient(true);
@@ -74,27 +76,38 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } else if (user) {
       const allowedRoutes = navConfig[user.role] || [];
       const isAllowed = allowedRoutes.some(route => pathname.startsWith(route));
+      const landingPage = settings.defaultLandingPage === 'forecast' ? '/external-data' : `/${settings.defaultLandingPage}`;
       
       if (pathIsPublic) {
-         router.push('/dashboard');
+         router.push(landingPage);
       } else if (!isAllowed) {
          router.push(allowedRoutes[0] || '/dashboard');
       }
     }
-  }, [user, loading, pathname, router, isClient]);
+  }, [user, loading, pathname, router, isClient, settings.defaultLandingPage]);
 
 
   const contextValue = useMemo(() => ({ user, setUser, loading }), [user, loading]);
 
-  if (loading) {
-    return null; // Or a loading spinner component
+  // Only render children when the client check is complete and auth status is resolved.
+  if (!isClient || loading) {
+    return null;
+  }
+  
+  const publicPaths = ['/login'];
+  const pathIsPublic = publicPaths.includes(pathname);
+
+  // If we're on a public path, or we have a user, render the children.
+  if (pathIsPublic || user) {
+    return (
+      <UserContext.Provider value={contextValue}>
+        {children}
+      </UserContext.Provider>
+    );
   }
 
-  return (
-    <UserContext.Provider value={contextValue}>
-      {children}
-    </UserContext.Provider>
-  );
+  // Otherwise, we are redirecting, so don't render anything.
+  return null;
 }
 
 export function useUser() {

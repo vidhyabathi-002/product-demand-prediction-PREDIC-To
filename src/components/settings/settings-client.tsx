@@ -7,22 +7,23 @@ import { useActivityLog } from '@/context/activity-log-context';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from './confirmation-dialog';
 import { User, KeyRound, Bell, Languages, Shield, Trash2, LogOut, ChevronRight, Palette, LayoutDashboard, Calendar, DollarSign, FileText, AlertTriangle } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useSettings } from '@/context/settings-context';
 
 export default function SettingsClient() {
   const { user } = useUser();
   const { addLog, clearLogs } = useActivityLog();
   const { toast } = useToast();
   const router = useRouter();
+  const { setTheme } = useTheme();
+  const { settings, setSetting } = useSettings();
 
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+
   const [isClearLogsDialogOpen, setIsClearLogsDialogOpen] = useState(false);
   const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] = useState(false);
 
@@ -98,15 +99,15 @@ export default function SettingsClient() {
           </SettingRow>
           
           <SettingRow icon={KeyRound} title="Change Password" description="Update your current password.">
-              <Button variant="outline" size="sm">Update</Button>
+              <Button variant="outline" size="sm" disabled>Update</Button>
           </SettingRow>
 
           <SettingRow icon={Shield} title="Two-Factor Authentication" description="Add an extra layer of security.">
-            <Switch id="2fa" checked={twoFactorEnabled} onCheckedChange={setTwoFactorEnabled} />
+            <Switch id="2fa" checked={settings.twoFactorEnabled} onCheckedChange={(checked) => setSetting('twoFactorEnabled', checked)} />
           </SettingRow>
 
           <SettingRow icon={LayoutDashboard} title="Default Landing Page" description="Choose the page you see after login.">
-            <Select defaultValue="dashboard">
+            <Select value={settings.defaultLandingPage} onValueChange={(value) => setSetting('defaultLandingPage', value)}>
                 <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select Page" />
                 </SelectTrigger>
@@ -135,7 +136,7 @@ export default function SettingsClient() {
         </CardHeader>
         <CardContent className="space-y-4">
            <SettingRow icon={Palette} title="Theme" description="Switch between light and dark mode.">
-             <Select defaultValue="system">
+             <Select onValueChange={setTheme} defaultValue="system">
                 <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Theme" />
                 </SelectTrigger>
@@ -147,7 +148,7 @@ export default function SettingsClient() {
             </Select>
            </SettingRow>
            <SettingRow icon={Languages} title="Language" description="Choose your preferred language.">
-            <Select defaultValue="en">
+            <Select value={settings.language} onValueChange={(value) => setSetting('language', value)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Language" />
               </SelectTrigger>
@@ -159,22 +160,22 @@ export default function SettingsClient() {
             </Select>
           </SettingRow>
           <SettingRow icon={Bell} title="Enable Notifications" description="Control whether you receive toast alerts.">
-            <Switch id="notifications" checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
+            <Switch id="notifications" checked={settings.notificationsEnabled} onCheckedChange={(checked) => setSetting('notificationsEnabled', checked)} />
           </SettingRow>
           <SettingRow icon={Calendar} title="Date Format" description="Set your preferred date display format.">
-            <Select defaultValue="MM-DD-YYYY">
+            <Select value={settings.dateFormat} onValueChange={(value) => setSetting('dateFormat', value)}>
                 <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Date Format" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="MM-DD-YYYY">MM/DD/YYYY</SelectItem>
-                    <SelectItem value="DD-MM-YYYY">DD/MM/YYYY</SelectItem>
+                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
                     <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
                 </SelectContent>
             </Select>
           </SettingRow>
           <SettingRow icon={DollarSign} title="Currency Format" description="Set your preferred currency symbol.">
-             <Select defaultValue="INR">
+             <Select value={settings.currency} onValueChange={(value) => setSetting('currency', value)}>
                 <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Currency" />
                 </SelectTrigger>
@@ -194,7 +195,7 @@ export default function SettingsClient() {
           <CardHeader>
             <CardTitle>Admin Settings</CardTitle>
             <CardDescription>Manage system-level configurations.</CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent className="space-y-4">
              <SettingRow icon={Shield} title="Manage Roles and Permissions" description="Go to the User Management dashboard.">
                 <Button variant="outline" size="sm" onClick={() => router.push('/admin')}>
@@ -202,10 +203,10 @@ export default function SettingsClient() {
                 </Button>
             </SettingRow>
              <SettingRow icon={FileText} title="Enable Audit Logs" description="Keep detailed logs of all system activities.">
-                <Switch defaultChecked />
+                <Switch checked={settings.auditLogsEnabled} onCheckedChange={(checked) => setSetting('auditLogsEnabled', checked)} />
             </SettingRow>
              <SettingRow icon={AlertTriangle} title="Configure System Alerts" description="Notify on low forecast accuracy.">
-                <Switch />
+                <Switch checked={settings.systemAlertsEnabled} onCheckedChange={(checked) => setSetting('systemAlertsEnabled', checked)} />
             </SettingRow>
           </CardContent>
            <CardFooter className="border-t pt-6">
