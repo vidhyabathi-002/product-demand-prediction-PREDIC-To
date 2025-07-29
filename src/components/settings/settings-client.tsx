@@ -195,7 +195,7 @@ export default function SettingsClient() {
           <CardHeader>
             <CardTitle>Admin Settings</CardTitle>
             <CardDescription>Manage system-level configurations.</CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent className="space-y-4">
              <SettingRow icon={Shield} title="Manage Roles and Permissions" description="Go to the User Management dashboard.">
                 <Button variant="outline" size="sm" onClick={() => router.push('/admin')}>
