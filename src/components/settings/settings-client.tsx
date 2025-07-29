@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from './confirmation-dialog';
-import { User, KeyRound, Bell, Languages, Shield, Trash2, LogOut, ChevronRight, Palette, LayoutDashboard, Calendar, DollarSign } from 'lucide-react';
+import { User, KeyRound, Bell, Languages, Shield, Trash2, LogOut, ChevronRight, Palette, LayoutDashboard, Calendar, DollarSign, FileText, AlertTriangle } from 'lucide-react';
 
 export default function SettingsClient() {
   const { user } = useUser();
@@ -237,4 +237,3 @@ export default function SettingsClient() {
     </div>
   );
 }
-
