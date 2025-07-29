@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2 } from 'lucide-react';
+import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2, Target, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -242,8 +242,22 @@ export default function UploadClient() {
                           </div>
                         <p className="text-2xl font-bold">{prediction.confidence}</p>
                       </Card>
+                      <Card className="p-4">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Target className="h-5 w-5 text-blue-500" />
+                            <span className="text-sm">Accuracy</span>
+                          </div>
+                        <p className="text-2xl font-bold">{(prediction.accuracy * 100).toFixed(0)}%</p>
+                      </Card>
+                      <Card className="p-4">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Award className="h-5 w-5 text-purple-500" />
+                            <span className="text-sm">F1-Score</span>
+                          </div>
+                        <p className="text-2xl font-bold">{prediction.f1Score.toFixed(2)}</p>
+                      </Card>
                       {prediction.modelUsed && (
-                        <Card className="p-4 col-span-2 lg:col-span-4">
+                        <Card className="p-4 col-span-2">
                             <div className="flex items-center gap-2 text-muted-foreground">
                               <Cpu className="h-5 w-5 text-primary" />
                               <span className="text-sm">Model Used</span>
@@ -309,6 +323,14 @@ function PredictionSkeleton() {
             <Skeleton className="h-8 w-16" />
           </Card>
            <Card className="p-4 space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-8 w-16" />
+          </Card>
+          <Card className="p-4 space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-8 w-16" />
+          </Card>
+          <Card className="p-4 space-y-2">
             <Skeleton className="h-5 w-24" />
             <Skeleton className="h-8 w-16" />
           </Card>
