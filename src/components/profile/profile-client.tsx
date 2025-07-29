@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, User as UserIcon } from 'lucide-react';
+import { Camera, User as UserIcon, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 export default function ProfileClient() {
   const { user, setUser, loading } = useUser();
@@ -21,6 +22,7 @@ export default function ProfileClient() {
   const [avatar, setAvatar] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     if (user) {
@@ -76,11 +78,17 @@ export default function ProfileClient() {
 
   return (
     <div className="space-y-6">
-       <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your personal information and profile picture.
-        </p>
+       <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+        </Button>
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
+          <p className="text-muted-foreground">
+            Manage your personal information and profile picture.
+          </p>
+        </div>
       </div>
       <form onSubmit={handleSubmit}>
         <Card>
