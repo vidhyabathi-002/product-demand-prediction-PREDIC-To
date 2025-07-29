@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2, Target, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,8 @@ import { Label } from '../ui/label';
 import { useNotification } from '@/context/notification-context';
 import { useActivityLog } from '@/context/activity-log-context';
 import { useUser } from '@/context/user-context';
+import { getModelPerformance, type ModelPerformance } from '@/ai/flows/get-model-performance';
+import { ModelPerformanceChart } from './model-performance-chart';
 
 const models: { id: ModelType; label: string; description: string }[] = [
     { id: 'ARIMA', label: 'ARIMA', description: 'Good for stable trends and seasonality.' },
@@ -31,6 +33,7 @@ export default function UploadClient() {
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState<PredictDemandFromCsvOutput | null>(null);
+  const [modelPerformance, setModelPerformance] = useState<ModelPerformance[]>([]);
   const [selectedModel, setSelectedModel] = useState<ModelType>('ARIMA');
   const { toast } = useToast();
   const router = useRouter();
@@ -45,6 +48,7 @@ export default function UploadClient() {
         setFile(selectedFile);
         setFileName(selectedFile.name);
         setPrediction(null);
+        setModelPerformance([]);
         
         const reader = new FileReader();
         reader.onload = async (e) => {
@@ -72,6 +76,7 @@ export default function UploadClient() {
         setFile(new File([text], "sample-sales-data.csv", { type: "text/csv" }));
         setFileName("sample-sales-data.csv");
         setPrediction(null);
+        setModelPerformance([]);
         sessionStorage.removeItem('predictionReport');
          toast({
           title: 'Sample Data Loaded',
@@ -98,12 +103,19 @@ export default function UploadClient() {
 
     setLoading(true);
     setPrediction(null);
+    setModelPerformance([]);
     sessionStorage.removeItem('predictionReport');
 
     try {
-        const result = await predictDemandFromCsv({ csvData: csvString, model: selectedModel });
-        setPrediction(result);
-        sessionStorage.setItem('predictionReport', JSON.stringify(result));
+        const [predictionResult, performanceResult] = await Promise.all([
+          predictDemandFromCsv({ csvData: csvString, model: selectedModel }),
+          getModelPerformance()
+        ]);
+        
+        setPrediction(predictionResult);
+        setModelPerformance(performanceResult);
+        
+        sessionStorage.setItem('predictionReport', JSON.stringify(predictionResult));
         addNotification({
             title: 'Report Generated',
             message: 'Your demand forecast report is now available.',
@@ -266,6 +278,9 @@ export default function UploadClient() {
                         </Card>
                       )}
                     </div>
+                     {modelPerformance.length > 0 && (
+                        <ModelPerformanceChart data={modelPerformance} />
+                    )}
                   </div>
                 </div>
                 <Card>
