@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 type User = {
   id: number;
@@ -36,6 +37,7 @@ export default function UserManagementClient() {
   const { user: adminUser } = useUser();
   const { addLog } = useActivityLog();
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleRoleChange = (userId: number, newRole: UserRole) => {
     const userToUpdate = users.find(u => u.id === userId);
@@ -73,11 +75,17 @@ export default function UserManagementClient() {
 
   return (
     <div className="space-y-6">
-       <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-        <p className="text-muted-foreground">
-          View and manage user roles and permissions across the application.
-        </p>
+       <div className="flex items-center gap-4">
+         <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+        </Button>
+        <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+            <p className="text-muted-foreground">
+            View and manage user roles and permissions across the application.
+            </p>
+        </div>
       </div>
       <Card>
         <CardHeader>

@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from './confirmation-dialog';
-import { User, KeyRound, Bell, Languages, Shield, Trash2, LogOut, ChevronRight, Palette, LayoutDashboard, Calendar, DollarSign, FileText, AlertTriangle } from 'lucide-react';
+import { User, KeyRound, Bell, Languages, Shield, Trash2, LogOut, ChevronRight, Palette, LayoutDashboard, Calendar, DollarSign, FileText, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSettings } from '@/context/settings-context';
 
@@ -74,15 +74,21 @@ export default function SettingsClient() {
             {children}
         </div>
     </div>
-  )
+  );
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your account settings, application preferences, and more.
-        </p>
+      <div className="flex items-center gap-4">
+         <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+        </Button>
+        <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground">
+            Manage your account settings, application preferences, and more.
+            </p>
+        </div>
       </div>
 
       {/* Account Settings */}
