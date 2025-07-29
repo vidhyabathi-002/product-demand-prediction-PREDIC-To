@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { ConfirmationDialog } from './confirmation-dialog';
-import { User, KeyRound, Bell, Languages, Shield, Trash2, LogOut, ChevronRight } from 'lucide-react';
+import { User, KeyRound, Bell, Languages, Shield, Trash2, LogOut, ChevronRight, Palette, LayoutDashboard, Calendar, DollarSign } from 'lucide-react';
 
 export default function SettingsClient() {
   const { user } = useUser();
@@ -60,6 +60,21 @@ export default function SettingsClient() {
 
   const isAdmin = user.role === 'Administrator';
 
+  const SettingRow = ({ icon: Icon, title, description, children }: { icon: React.ElementType, title: string, description: string, children: React.ReactNode }) => (
+    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+        <div className="flex items-center gap-4">
+            <Icon className="w-5 h-5 text-primary" />
+            <div>
+                <p className="font-semibold">{title}</p>
+                <p className="text-sm text-muted-foreground">{description}</p>
+            </div>
+        </div>
+        <div>
+            {children}
+        </div>
+    </div>
+  )
+
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="space-y-1">
@@ -75,34 +90,34 @@ export default function SettingsClient() {
           <CardTitle>Account</CardTitle>
           <CardDescription>Manage your personal account details and security.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <button onClick={() => router.push('/profile')} className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-muted transition-colors border">
-            <div className="flex items-center gap-4">
-              <User className="w-5 h-5 text-primary" />
-              <div>
-                <p className="font-semibold">Profile Information</p>
-                <p className="text-sm text-muted-foreground">Update your name, email, and avatar.</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </button>
+        <CardContent className="space-y-4">
+          <SettingRow icon={User} title="Profile Information" description="Update your name, email, and avatar.">
+              <Button variant="outline" size="sm" onClick={() => router.push('/profile')}>
+                  Edit Profile <ChevronRight className="w-4 h-4 ml-2" />
+              </Button>
+          </SettingRow>
           
-          <div className="space-y-2 p-4 border rounded-lg">
-            <Label htmlFor="password">Change Password</Label>
-            <div className="flex gap-2">
-              <Input id="password" type="password" placeholder="Current Password" />
-              <Input type="password" placeholder="New Password" />
-              <Button>Update</Button>
-            </div>
-          </div>
+          <SettingRow icon={KeyRound} title="Change Password" description="Update your current password.">
+              <Button variant="outline" size="sm">Update</Button>
+          </SettingRow>
 
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="space-y-1">
-              <Label htmlFor="2fa" className="font-semibold">Two-Factor Authentication</Label>
-              <p className="text-sm text-muted-foreground">Add an extra layer of security to your account.</p>
-            </div>
+          <SettingRow icon={Shield} title="Two-Factor Authentication" description="Add an extra layer of security.">
             <Switch id="2fa" checked={twoFactorEnabled} onCheckedChange={setTwoFactorEnabled} />
-          </div>
+          </SettingRow>
+
+          <SettingRow icon={LayoutDashboard} title="Default Landing Page" description="Choose the page you see after login.">
+            <Select defaultValue="dashboard">
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select Page" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="dashboard">Dashboard</SelectItem>
+                    <SelectItem value="analytics">Analytics</SelectItem>
+                    <SelectItem value="external-data">Forecast</SelectItem>
+                </SelectContent>
+            </Select>
+          </SettingRow>
+
         </CardContent>
         <CardFooter className="border-t pt-6">
             <Button variant="destructive" onClick={() => setIsDeleteAccountDialogOpen(true)} className="flex items-center gap-2">
@@ -118,12 +133,20 @@ export default function SettingsClient() {
           <CardTitle>Application Preferences</CardTitle>
           <CardDescription>Customize your experience across the app.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-           <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="space-y-1">
-              <Label htmlFor="language" className="font-semibold">Language</Label>
-               <p className="text-sm text-muted-foreground">Choose your preferred language.</p>
-            </div>
+        <CardContent className="space-y-4">
+           <SettingRow icon={Palette} title="Theme" description="Switch between light and dark mode.">
+             <Select defaultValue="system">
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Theme" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+            </Select>
+           </SettingRow>
+           <SettingRow icon={Languages} title="Language" description="Choose your preferred language.">
             <Select defaultValue="en">
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Language" />
@@ -134,14 +157,34 @@ export default function SettingsClient() {
                 <SelectItem value="fr" disabled>French (Coming Soon)</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="space-y-1">
-              <Label htmlFor="notifications" className="font-semibold">Enable Notifications</Label>
-              <p className="text-sm text-muted-foreground">Control whether you receive toast alerts.</p>
-            </div>
+          </SettingRow>
+          <SettingRow icon={Bell} title="Enable Notifications" description="Control whether you receive toast alerts.">
             <Switch id="notifications" checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
-          </div>
+          </SettingRow>
+          <SettingRow icon={Calendar} title="Date Format" description="Set your preferred date display format.">
+            <Select defaultValue="MM-DD-YYYY">
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Date Format" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="MM-DD-YYYY">MM/DD/YYYY</SelectItem>
+                    <SelectItem value="DD-MM-YYYY">DD/MM/YYYY</SelectItem>
+                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                </SelectContent>
+            </Select>
+          </SettingRow>
+          <SettingRow icon={DollarSign} title="Currency Format" description="Set your preferred currency symbol.">
+             <Select defaultValue="INR">
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="INR">₹ (INR)</SelectItem>
+                    <SelectItem value="USD">$ (USD)</SelectItem>
+                    <SelectItem value="EUR">€ (EUR)</SelectItem>
+                </SelectContent>
+            </Select>
+          </SettingRow>
         </CardContent>
       </Card>
       
@@ -153,30 +196,17 @@ export default function SettingsClient() {
             <CardDescription>Manage system-level configurations.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <button onClick={() => router.push('/admin')} className="flex items-center justify-between w-full p-4 rounded-lg hover:bg-muted transition-colors border">
-                <div className="flex items-center gap-4">
-                <Shield className="w-5 h-5 text-primary" />
-                <div>
-                    <p className="font-semibold">Manage Roles and Permissions</p>
-                    <p className="text-sm text-muted-foreground">Go to the User Management dashboard.</p>
-                </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </button>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-                 <div className="space-y-1">
-                    <Label className="font-semibold">Enable Audit Logs</Label>
-                    <p className="text-sm text-muted-foreground">Keep detailed logs of all system activities.</p>
-                </div>
+             <SettingRow icon={Shield} title="Manage Roles and Permissions" description="Go to the User Management dashboard.">
+                <Button variant="outline" size="sm" onClick={() => router.push('/admin')}>
+                    View Admin Panel <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+            </SettingRow>
+             <SettingRow icon={FileText} title="Enable Audit Logs" description="Keep detailed logs of all system activities.">
                 <Switch defaultChecked />
-            </div>
-             <div className="flex items-center justify-between p-4 border rounded-lg">
-                 <div className="space-y-1">
-                    <Label className="font-semibold">Configure System Alerts</Label>
-                    <p className="text-sm text-muted-foreground">Notify on low forecast accuracy.</p>
-                </div>
+            </SettingRow>
+             <SettingRow icon={AlertTriangle} title="Configure System Alerts" description="Notify on low forecast accuracy.">
                 <Switch />
-            </div>
+            </SettingRow>
           </CardContent>
            <CardFooter className="border-t pt-6">
             <Button variant="outline" onClick={() => setIsClearLogsDialogOpen(true)}>
@@ -207,3 +237,4 @@ export default function SettingsClient() {
     </div>
   );
 }
+
