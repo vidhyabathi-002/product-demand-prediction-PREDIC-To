@@ -1,3 +1,4 @@
+
 import { AppSidebar } from "@/components/shared/sidebar";
 import { AppHeader } from "@/components/shared/header";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
@@ -6,6 +7,7 @@ import { PromoCard } from "@/components/dashboard/promo-card";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import UploadClient from "@/components/external-data/upload-client";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -39,6 +41,9 @@ export default function DashboardPage() {
               </div>
             </Suspense>
           </DashboardClient>
+          <div className="mt-6">
+            <UploadClient />
+          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>
