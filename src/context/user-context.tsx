@@ -1,4 +1,3 @@
-
 // src/context/user-context.tsx
 'use client';
 
