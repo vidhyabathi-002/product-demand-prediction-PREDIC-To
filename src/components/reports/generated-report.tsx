@@ -2,7 +2,7 @@
 'use client';
 import type { PredictDemandFromCsvOutput } from "@/ai/flows/predict-demand-from-csv";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, Cpu } from "lucide-react";
+import { BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, Cpu, Award, Target } from "lucide-react";
 import { PredictionChart } from "../external-data/prediction-chart";
 import { Separator } from "../ui/separator";
 
@@ -44,7 +44,7 @@ export function GeneratedReport({ data }: GeneratedReportProps) {
 
              <Separator />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="p-4 bg-muted/50 rounded-lg">
                 <div className="flex items-center gap-2 text-muted-foreground">
                    {data.salesTrend === 'Increasing' ? (
@@ -76,6 +76,20 @@ export function GeneratedReport({ data }: GeneratedReportProps) {
                     <span className="text-sm font-semibold">Confidence</span>
                   </div>
                 <p className="text-2xl font-bold mt-1">{data.confidence}</p>
+              </div>
+               <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Target className="h-5 w-5 text-blue-500" />
+                    <span className="text-sm font-semibold">Accuracy</span>
+                  </div>
+                <p className="text-2xl font-bold mt-1">{(data.accuracy * 100).toFixed(0)}%</p>
+              </div>
+               <div className="p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Award className="h-5 w-5 text-purple-500" />
+                    <span className="text-sm font-semibold">F1-Score</span>
+                  </div>
+                <p className="text-2xl font-bold mt-1">{data.f1Score.toFixed(2)}</p>
               </div>
             </div>
 
