@@ -7,7 +7,7 @@ import { PromoCard } from "@/components/dashboard/promo-card";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import UploadClient from "@/components/external-data/upload-client";
+import { ModelPerformanceSection } from "@/components/dashboard/model-performance-section";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -27,6 +27,18 @@ function PromoCardSkeleton() {
   )
 }
 
+function ModelPerformanceSkeleton() {
+    return (
+        <div className="space-y-6">
+            <div className="p-4 space-y-2 border rounded-lg">
+                <Skeleton className="h-7 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-4" />
+                <Skeleton className="h-80 w-full" />
+            </div>
+        </div>
+    )
+}
+
 export default function DashboardPage() {
   return (
     <SidebarProvider>
@@ -35,15 +47,15 @@ export default function DashboardPage() {
         <AppHeader />
         <main className="p-4 sm:p-6 lg:p-8">
           <DashboardClient>
-            <Suspense fallback={<PromoCardSkeleton />}>
-              <div className="grid grid-cols-1 gap-6">
-                <PromoCard />
-              </div>
-            </Suspense>
+            <div className="grid grid-cols-1 gap-6">
+                <Suspense fallback={<PromoCardSkeleton />}>
+                    <PromoCard />
+                </Suspense>
+                <Suspense fallback={<ModelPerformanceSkeleton />}>
+                    <ModelPerformanceSection />
+                </Suspense>
+            </div>
           </DashboardClient>
-          <div className="mt-6">
-            <UploadClient />
-          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>

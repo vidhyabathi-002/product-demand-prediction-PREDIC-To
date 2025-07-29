@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2, Target, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,8 +16,6 @@ import { Label } from '../ui/label';
 import { useNotification } from '@/context/notification-context';
 import { useActivityLog } from '@/context/activity-log-context';
 import { useUser } from '@/context/user-context';
-import { getModelPerformance, type ModelPerformance } from '@/ai/flows/get-model-performance';
-import { ModelPerformanceChart } from './model-performance-chart';
 
 const models: { id: ModelType; label: string; description: string }[] = [
     { id: 'ARIMA', label: 'ARIMA', description: 'Good for stable trends and seasonality.' },
@@ -33,37 +31,12 @@ export default function UploadClient() {
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState<PredictDemandFromCsvOutput | null>(null);
-  const [modelPerformance, setModelPerformance] = useState<ModelPerformance[]>([]);
-  const [performanceLoading, setPerformanceLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType>('ARIMA');
   const { toast } = useToast();
   const router = useRouter();
   const { addNotification } = useNotification();
   const { addLog } = useActivityLog();
   const { user } = useUser();
-
-
-  useEffect(() => {
-    const fetchPerformance = async () => {
-        setPerformanceLoading(true);
-        try {
-            const performanceResult = await getModelPerformance();
-            setModelPerformance(performanceResult);
-        } catch (error) {
-            console.error('Failed to fetch model performance:', error);
-            toast({
-                variant: 'destructive',
-                title: 'Load Failed',
-                description: 'Could not load model performance data.',
-            });
-        } finally {
-            setPerformanceLoading(false);
-        }
-    };
-
-    fetchPerformance();
-  }, [toast]);
-
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -190,6 +163,12 @@ export default function UploadClient() {
 
   return (
     <div className="space-y-6">
+       <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight">External Data</h1>
+        <p className="text-muted-foreground">
+          Upload historical data and select a model to generate a demand forecast.
+        </p>
+      </div>
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -237,21 +216,6 @@ export default function UploadClient() {
             </Button>
           </CardContent>
         </Card>
-
-        {performanceLoading && (
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-7 w-1/2" />
-                    <Skeleton className="h-4 w-3/4" />
-                </CardHeader>
-                <CardContent>
-                    <Skeleton className="h-80 w-full" />
-                </CardContent>
-            </Card>
-        )}
-        {!performanceLoading && modelPerformance.length > 0 && (
-            <ModelPerformanceChart data={modelPerformance} />
-        )}
 
         <div className='space-y-6'>
             {loading && <PredictionSkeleton />}
