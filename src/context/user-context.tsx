@@ -22,10 +22,10 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/analytics", "/reports"],
-  "Marketing Team": ["/dashboard", "/analytics"],
-  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports"],
-  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics"],
+  "Product Manager": ["/dashboard", "/analytics", "/reports", "/profile"],
+  "Marketing Team": ["/dashboard", "/analytics", "/profile"],
+  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports", "/profile"],
+  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics", "/profile"],
 };
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -50,28 +50,31 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const setUser = (user: User | null) => {
     setUserState(user);
     if (user) {
-      sessionStorage.setItem('user', JSON.stringify(user));
+      try {
+        sessionStorage.setItem('user', JSON.stringify(user));
+      } catch (error) {
+         console.error("Failed to save user to session storage", error);
+      }
     } else {
       sessionStorage.removeItem('user');
     }
   };
-
+  
   useEffect(() => {
     if (loading) return;
 
     const publicPaths = ['/login'];
     const pathIsPublic = publicPaths.includes(pathname);
-    const isProfilePage = pathname === '/profile';
-
+    
     if (!user && !pathIsPublic) {
       router.push('/login');
     } else if (user) {
       if (pathIsPublic) {
         router.push('/dashboard');
-      } else if (!isProfilePage) {
+      } else {
         const allowedRoutes = navConfig[user.role] || [];
-        const currentRoute = '/' + pathname.split('/')[1]; // get base route
-        if (!allowedRoutes.includes(currentRoute)) {
+        const currentBaseRoute = '/' + pathname.split('/')[1];
+        if (!allowedRoutes.includes(currentBaseRoute)) {
             router.push(allowedRoutes[0] || '/dashboard');
         }
       }
