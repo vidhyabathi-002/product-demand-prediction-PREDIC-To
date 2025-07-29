@@ -34,12 +34,36 @@ export default function UploadClient() {
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState<PredictDemandFromCsvOutput | null>(null);
   const [modelPerformance, setModelPerformance] = useState<ModelPerformance[]>([]);
+  const [performanceLoading, setPerformanceLoading] = useState(true);
   const [selectedModel, setSelectedModel] = useState<ModelType>('ARIMA');
   const { toast } = useToast();
   const router = useRouter();
   const { addNotification } = useNotification();
   const { addLog } = useActivityLog();
   const { user } = useUser();
+
+
+  useEffect(() => {
+    const fetchPerformance = async () => {
+        setPerformanceLoading(true);
+        try {
+            const performanceResult = await getModelPerformance();
+            setModelPerformance(performanceResult);
+        } catch (error) {
+            console.error('Failed to fetch model performance:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Load Failed',
+                description: 'Could not load model performance data.',
+            });
+        } finally {
+            setPerformanceLoading(false);
+        }
+    };
+
+    fetchPerformance();
+  }, [toast]);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -48,7 +72,6 @@ export default function UploadClient() {
         setFile(selectedFile);
         setFileName(selectedFile.name);
         setPrediction(null);
-        setModelPerformance([]);
         
         const reader = new FileReader();
         reader.onload = async (e) => {
@@ -76,7 +99,6 @@ export default function UploadClient() {
         setFile(new File([text], "sample-sales-data.csv", { type: "text/csv" }));
         setFileName("sample-sales-data.csv");
         setPrediction(null);
-        setModelPerformance([]);
         sessionStorage.removeItem('predictionReport');
          toast({
           title: 'Sample Data Loaded',
@@ -103,17 +125,12 @@ export default function UploadClient() {
 
     setLoading(true);
     setPrediction(null);
-    setModelPerformance([]);
     sessionStorage.removeItem('predictionReport');
 
     try {
-        const [predictionResult, performanceResult] = await Promise.all([
-          predictDemandFromCsv({ csvData: csvString, model: selectedModel }),
-          getModelPerformance()
-        ]);
+        const predictionResult = await predictDemandFromCsv({ csvData: csvString, model: selectedModel });
         
         setPrediction(predictionResult);
-        setModelPerformance(performanceResult);
         
         sessionStorage.setItem('predictionReport', JSON.stringify(predictionResult));
         addNotification({
@@ -143,8 +160,8 @@ export default function UploadClient() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-1">
+      <div className="space-y-6">
+        <Card>
           <CardHeader>
             <CardTitle>Configure Prediction</CardTitle>
             <CardDescription>
@@ -152,41 +169,61 @@ export default function UploadClient() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label>1. Upload Sales Data</Label>
-              <div className="flex gap-2">
-                <Input id="file-upload" type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
-                <Button asChild variant="outline" className="w-full">
-                    <label htmlFor="file-upload" className="cursor-pointer flex items-center gap-2">
-                    <Upload className="h-4 w-4" />
-                    <span>{fileName || 'Choose CSV...'}</span>
-                    </label>
-                </Button>
-                <Button onClick={loadSampleData} variant="secondary" title="Load Sample Data">
-                    <TestTube2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <Label>2. Select ML Model</Label>
-              <RadioGroup value={selectedModel} onValueChange={(value: string) => setSelectedModel(value as ModelType)}>
-                 {models.map(model => (
-                  <Card key={model.id} className="p-4 flex items-start gap-4 has-[:checked]:bg-primary/10 has-[:checked]:border-primary">
-                    <RadioGroupItem value={model.id} id={model.id} className="mt-1" />
-                    <div className="grid gap-1.5">
-                      <Label htmlFor={model.id} className="font-semibold cursor-pointer">{model.label}</Label>
-                      <p className="text-xs text-muted-foreground">{model.description}</p>
-                    </div>
-                  </Card>
-                ))}
-              </RadioGroup>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                <Label>1. Upload Sales Data</Label>
+                <div className="flex gap-2">
+                    <Input id="file-upload" type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
+                    <Button asChild variant="outline" className="w-full">
+                        <label htmlFor="file-upload" className="cursor-pointer flex items-center gap-2">
+                        <Upload className="h-4 w-4" />
+                        <span>{fileName || 'Choose CSV...'}</span>
+                        </label>
+                    </Button>
+                    <Button onClick={loadSampleData} variant="secondary" title="Load Sample Data">
+                        <TestTube2 className="h-4 w-4" />
+                    </Button>
+                </div>
+                </div>
+                 <div className="space-y-2">
+                    <Label>2. Select ML Model</Label>
+                    <RadioGroup value={selectedModel} onValueChange={(value: string) => setSelectedModel(value as ModelType)} className="flex flex-wrap gap-4">
+                        {models.map(model => (
+                            <div key={model.id}>
+                                <RadioGroupItem value={model.id} id={model.id} className="peer sr-only" />
+                                <Label
+                                htmlFor={model.id}
+                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                                >
+                                {model.label}
+                                </Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
+                </div>
             </div>
             <Button onClick={handleUpload} disabled={!csvString || loading} className="w-full">
               {loading ? 'Analyzing...' : 'Predict Demand'}
             </Button>
           </CardContent>
         </Card>
-        <div className='md:col-span-2 space-y-6'>
+
+        {performanceLoading && (
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-7 w-1/2" />
+                    <Skeleton className="h-4 w-3/4" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-80 w-full" />
+                </CardContent>
+            </Card>
+        )}
+        {!performanceLoading && modelPerformance.length > 0 && (
+            <ModelPerformanceChart data={modelPerformance} />
+        )}
+
+        <div className='space-y-6'>
             {loading && <PredictionSkeleton />}
 
             {!loading && !prediction && (
@@ -278,9 +315,6 @@ export default function UploadClient() {
                         </Card>
                       )}
                     </div>
-                     {modelPerformance.length > 0 && (
-                        <ModelPerformanceChart data={modelPerformance} />
-                    )}
                   </div>
                 </div>
                 <Card>
