@@ -55,6 +55,13 @@ export function SocialSentimentCard() {
         socialMediaPosts,
       });
       setAnalysisResult(result);
+       if (result.sentiment === 'Negative') {
+        toast({
+            variant: 'warning',
+            title: 'Negative Sentiment Detected',
+            description: 'Social media sentiment is currently negative. Monitor closely.'
+        });
+      }
     } catch (error) {
       console.error("Sentiment analysis failed:", error);
       toast({

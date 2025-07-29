@@ -31,6 +31,11 @@ export function PromoCard() {
           "A new sleek and powerful laptop with a 12-hour battery life, 4K display, and AI-powered productivity features.",
       });
       setPromotionalText(result.promotionalText);
+      toast({
+        variant: 'info',
+        title: 'Promotion Generated',
+        description: 'AI-generated promotional text is ready.'
+      });
     } catch (error) {
       console.error("Failed to generate promotional text:", error);
       toast({

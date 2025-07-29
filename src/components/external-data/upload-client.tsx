@@ -80,6 +80,11 @@ export default function UploadClient() {
         };
         reader.readAsText(selectedFile);
         sessionStorage.removeItem('predictionReport');
+        toast({
+            variant: 'success',
+            title: 'File Uploaded',
+            description: 'Sales data uploaded successfully!'
+        });
 
       } else {
         toast({
@@ -116,7 +121,7 @@ export default function UploadClient() {
   const handleUpload = async () => {
     if (!csvString) {
       toast({
-        variant: 'destructive',
+        variant: 'warning',
         title: 'No Data',
         description: 'Please select a CSV file or load the sample data.',
       });
@@ -145,6 +150,31 @@ export default function UploadClient() {
                 details: `Generated demand forecast using ${selectedModel} model.`
             })
         }
+        toast({
+            variant: 'info',
+            title: 'Forecast Complete',
+            description: 'Demand forecast has been generated.'
+        });
+
+        if (predictionResult.salesTrend === 'Decreasing') {
+            toast({
+                variant: 'warning',
+                title: 'Demand Drop Warning',
+                description: 'Predicted demand is falling. Consider adjusting price or marketing spend.'
+            });
+        }
+
+        const avgHistorical = predictionResult.chartData.filter(d => d.historical > 0).reduce((acc, d) => acc + d.historical, 0) / (predictionResult.chartData.filter(d => d.historical > 0).length || 1);
+        const peakPrediction = Math.max(...predictionResult.chartData.map(d => d.predicted));
+
+        if (peakPrediction > avgHistorical * 2) { // Example threshold for a spike
+             toast({
+                variant: 'info',
+                title: 'High Demand Spike',
+                description: 'High demand forecasted! You might want to increase stock.'
+            });
+        }
+
 
     } catch (error) {
         console.error('Prediction failed:', error);

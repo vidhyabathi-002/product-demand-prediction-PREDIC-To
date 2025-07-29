@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
-import { X } from "lucide-react"
+import { X, CheckCircle2, AlertTriangle, Info, AlertCircle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -32,6 +32,9 @@ const toastVariants = cva(
         default: "border bg-background text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
+        success: "success group border-green-500 bg-green-500 text-white",
+        warning: "warning group border-amber-500 bg-amber-500 text-white",
+        info: "info group border-blue-500 bg-blue-500 text-white",
       },
     },
     defaultVariants: {
@@ -45,12 +48,25 @@ const Toast = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants>
 >(({ className, variant, ...props }, ref) => {
+  const Icon = {
+    success: CheckCircle2,
+    warning: AlertTriangle,
+    info: Info,
+    destructive: AlertCircle,
+    default: Info,
+  }[variant || 'default'];
+
   return (
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastVariants({ variant }), className)}
       {...props}
-    />
+    >
+      <div className="flex items-start gap-3">
+        <Icon className="h-6 w-6" />
+        <div className="flex-1">{props.children}</div>
+      </div>
+    </ToastPrimitives.Root>
   )
 })
 Toast.displayName = ToastPrimitives.Root.displayName
@@ -77,7 +93,11 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100",
+      "group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
+      "group-[.success]:text-green-300 group-[.success]:hover:text-green-50 group-[.success]:focus:ring-green-400 group-[.success]:focus:ring-offset-green-600",
+      "group-[.warning]:text-amber-300 group-[.warning]:hover:text-amber-50 group-[.warning]:focus:ring-amber-400 group-[.warning]:focus:ring-offset-amber-600",
+      "group-[.info]:text-blue-300 group-[.info]:hover:text-blue-50 group-[.info]:focus:ring-blue-400 group-[.info]:focus:ring-offset-blue-600",
       className
     )}
     toast-close=""

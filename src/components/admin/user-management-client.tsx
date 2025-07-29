@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type User = {
   id: number;
@@ -34,6 +35,7 @@ export default function UserManagementClient() {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const { user: adminUser } = useUser();
   const { addLog } = useActivityLog();
+  const { toast } = useToast();
 
   const handleRoleChange = (userId: number, newRole: UserRole) => {
     const userToUpdate = users.find(u => u.id === userId);
@@ -45,6 +47,11 @@ export default function UserManagementClient() {
         details: `Changed ${userToUpdate.name}'s role from ${userToUpdate.role} to ${newRole}`
     });
     setUsers(users.map(user => user.id === userId ? { ...user, role: newRole } : user));
+    toast({
+        variant: 'success',
+        title: 'User Role Changed',
+        description: `${userToUpdate.name}'s role has been updated to ${newRole}.`
+    });
   };
   
   const handleStatusChange = (userId: number, newStatus: "Active" | "Inactive") => {
@@ -57,6 +64,11 @@ export default function UserManagementClient() {
         details: `${newStatus === 'Active' ? 'Activated' : 'Deactivated'} user ${userToUpdate.name}`
     });
      setUsers(users.map(user => user.id === userId ? { ...user, status: newStatus } : user));
+     toast({
+        variant: 'info',
+        title: 'User Status Changed',
+        description: `User ${userToUpdate.name} has been ${newStatus === 'Active' ? 'activated' : 'deactivated'}.`
+    });
   }
 
   return (

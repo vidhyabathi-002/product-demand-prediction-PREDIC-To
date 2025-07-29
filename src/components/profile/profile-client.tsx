@@ -63,6 +63,7 @@ export default function ProfileClient() {
       });
 
       toast({
+        variant: 'success',
         title: 'Profile Updated',
         description: 'Your personal information has been saved.',
       });
