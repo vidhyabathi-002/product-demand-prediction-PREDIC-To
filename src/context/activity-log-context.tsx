@@ -1,3 +1,4 @@
+
 // src/context/activity-log-context.tsx
 'use client';
 
@@ -16,6 +17,7 @@ type NewLogEntry = Omit<LogEntry, 'id' | 'timestamp'>;
 interface ActivityLogContextType {
   logs: LogEntry[];
   addLog: (entry: NewLogEntry) => void;
+  clearLogs: () => void;
 }
 
 const ActivityLogContext = createContext<ActivityLogContextType | undefined>(undefined);
@@ -56,8 +58,13 @@ export function ActivityLogProvider({ children }: { children: ReactNode }) {
     setLogs(prevLogs => [newLog, ...prevLogs]);
   };
 
+  const clearLogs = () => {
+    setLogs([]);
+    sessionStorage.removeItem('activityLogs');
+  }
+
   return (
-    <ActivityLogContext.Provider value={{ logs, addLog }}>
+    <ActivityLogContext.Provider value={{ logs, addLog, clearLogs }}>
       {children}
     </ActivityLogContext.Provider>
   );

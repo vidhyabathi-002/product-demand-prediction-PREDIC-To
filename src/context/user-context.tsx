@@ -1,7 +1,8 @@
+
 // src/context/user-context.tsx
 'use client';
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export type UserRole = 'Product Manager' | 'Marketing Team' | 'Data Scientist' | 'Administrator';
@@ -22,19 +23,21 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/analytics", "/reports"],
-  "Marketing Team": ["/dashboard", "/analytics"],
-  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports"],
-  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics"],
+  "Product Manager": ["/dashboard", "/analytics", "/reports", "/settings", "/profile"],
+  "Marketing Team": ["/dashboard", "/analytics", "/settings", "/profile"],
+  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports", "/settings", "/profile"],
+  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics", "/settings", "/profile"],
 };
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-
+  
   useEffect(() => {
+    setIsClient(true);
     try {
       const storedUser = sessionStorage.getItem('user');
       if (storedUser) {
@@ -61,7 +64,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
   
   useEffect(() => {
-    if (loading) return;
+    if (loading || !isClient) return;
 
     const publicPaths = ['/login'];
     const pathIsPublic = publicPaths.includes(pathname);
@@ -69,22 +72,27 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (!user && !pathIsPublic) {
       router.push('/login');
     } else if (user) {
-      const allowedRoutes = [...(navConfig[user.role] || []), '/profile'];
+      const allowedRoutes = navConfig[user.role] || [];
+      const isAllowed = allowedRoutes.some(route => pathname.startsWith(route));
+      
       if (pathIsPublic) {
-        router.push('/dashboard');
-      } else {
-        const currentBaseRoute = '/' + pathname.split('/')[1];
-        if (!allowedRoutes.includes(currentBaseRoute)) {
-            router.push(allowedRoutes[0] || '/dashboard');
-        }
+         router.push('/dashboard');
+      } else if (!isAllowed) {
+         router.push(allowedRoutes[0] || '/dashboard');
       }
     }
-  }, [user, loading, pathname, router]);
+  }, [user, loading, pathname, router, isClient]);
 
+
+  const contextValue = useMemo(() => ({ user, setUser, loading }), [user, loading]);
+
+  if (loading) {
+    return null; // Or a loading spinner component
+  }
 
   return (
-    <UserContext.Provider value={{ user, setUser, loading }}>
-      {!loading && children}
+    <UserContext.Provider value={contextValue}>
+      {children}
     </UserContext.Provider>
   );
 }

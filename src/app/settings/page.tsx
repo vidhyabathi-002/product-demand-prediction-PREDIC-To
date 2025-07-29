@@ -1,0 +1,24 @@
+
+import { AppSidebar } from "@/components/shared/sidebar";
+import { AppHeader } from "@/components/shared/header";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import SettingsClient from "@/components/settings/settings-client";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Settings",
+};
+
+export default function SettingsPage() {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <AppHeader />
+        <main className="p-4 sm:p-6 lg:p-8">
+          <SettingsClient />
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}

@@ -18,10 +18,10 @@ import { useUser } from "@/context/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/analytics", "/reports"],
-  "Marketing Team": ["/dashboard", "/analytics"],
-  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports"],
-  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics"],
+  "Product Manager": ["/dashboard", "/analytics", "/reports", "/settings", "/profile"],
+  "Marketing Team": ["/dashboard", "/analytics", "/settings", "/profile"],
+  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports", "/settings", "/profile"],
+  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics", "/settings", "/profile"],
 };
 
 const allMenuItems = [
