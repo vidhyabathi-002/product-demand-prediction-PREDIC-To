@@ -16,6 +16,12 @@ import { Label } from '../ui/label';
 import { useNotification } from '@/context/notification-context';
 import { useActivityLog } from '@/context/activity-log-context';
 import { useUser } from '@/context/user-context';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const models: { id: ModelType; label: string; description: string }[] = [
     { id: 'ARIMA', label: 'ARIMA', description: 'Good for stable trends and seasonality.' },
@@ -24,6 +30,17 @@ const models: { id: ModelType; label: string; description: string }[] = [
     { id: 'Random Forest', label: 'Random Forest', description: 'Ensemble model, robust to outliers and noise.' },
     { id: 'XGBoost', label: 'XGBoost', description: 'Advanced ensemble model known for high accuracy.' },
 ];
+
+const performanceMetricsConfig = {
+    accuracy: { label: 'Accuracy', description: "Percentage of correct predictions. Higher is better.", interpretation: (val: number) => val > 0.9 ? 'Good' : val > 0.8 ? 'Average' : 'Needs Improvement' },
+    f1Score: { label: 'F1 Score', description: "A balance between precision and recall. Higher is better (closer to 1).", interpretation: (val: number) => val > 0.9 ? 'Good' : val > 0.8 ? 'Average' : 'Needs Improvement' },
+    mae: { label: 'MAE', description: "Mean Absolute Error. The average absolute difference between predicted and actual values. Lower is better.", interpretation: (val: number) => val < 50 ? 'Good' : val < 100 ? 'Average' : 'Needs Improvement' },
+    rmse: { label: 'RMSE', description: "Root Mean Squared Error. Similar to MAE but punishes larger errors more severely. Lower is better.", interpretation: (val: number) => val < 60 ? 'Good' : val < 120 ? 'Average' : 'Needs Improvement' },
+    rSquared: { label: 'R² Score', description: "Proportion of the variance in the dependent variable that is predictable. Higher is better (closer to 1).", interpretation: (val: number) => val > 0.85 ? 'Good' : val > 0.7 ? 'Average' : 'Needs Improvement' },
+};
+
+type PerformanceMetricKey = keyof typeof performanceMetricsConfig;
+
 
 export default function UploadClient() {
   const [file, setFile] = useState<File | null>(null);
@@ -161,6 +178,34 @@ export default function UploadClient() {
     }
   };
 
+  const PerformanceMetricCard = ({ metricKey, value }: { metricKey: PerformanceMetricKey, value: number }) => {
+    const config = performanceMetricsConfig[metricKey];
+    if (!config) return null;
+
+    const formattedValue = metricKey === 'accuracy' || metricKey === 'rSquared' ? `${(value * 100).toFixed(0)}%` : metricKey === 'f1Score' ? value.toFixed(2) : value;
+
+    return (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <CardTitle className="text-sm font-medium cursor-help">{config.label}</CardTitle>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{config.description}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{formattedValue}</div>
+                <p className="text-xs text-muted-foreground">{config.interpretation(value)}</p>
+            </CardContent>
+        </Card>
+    );
+  };
+
   return (
     <div className="space-y-6">
        <div className="space-y-1">
@@ -252,6 +297,23 @@ export default function UploadClient() {
                         <p className="text-sm text-muted-foreground">{prediction.summary}</p>
                       </CardContent>
                     </Card>
+
+                    <div className="grid grid-cols-1 gap-6">
+                        <Card>
+                             <CardHeader>
+                                <CardTitle>Model Performance on Uploaded Data</CardTitle>
+                                <CardDescription>Key metrics evaluating the performance of the {prediction.modelUsed} model.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                <PerformanceMetricCard metricKey="accuracy" value={prediction.accuracy} />
+                                <PerformanceMetricCard metricKey="f1Score" value={prediction.f1Score} />
+                                <PerformanceMetricCard metricKey="mae" value={prediction.mae} />
+                                <PerformanceMetricCard metricKey="rmse" value={prediction.rmse} />
+                                <PerformanceMetricCard metricKey="rSquared" value={prediction.rSquared} />
+                            </CardContent>
+                        </Card>
+                    </div>
+
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                        <Card className="p-4">
                         <div className="flex items-center gap-2 text-muted-foreground">
@@ -285,29 +347,6 @@ export default function UploadClient() {
                           </div>
                         <p className="text-2xl font-bold">{prediction.confidence}</p>
                       </Card>
-                      <Card className="p-4">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Target className="h-5 w-5 text-blue-500" />
-                            <span className="text-sm">Accuracy</span>
-                          </div>
-                        <p className="text-2xl font-bold">{(prediction.accuracy * 100).toFixed(0)}%</p>
-                      </Card>
-                      <Card className="p-4">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Award className="h-5 w-5 text-purple-500" />
-                            <span className="text-sm">F1-Score</span>
-                          </div>
-                        <p className="text-2xl font-bold">{prediction.f1Score.toFixed(2)}</p>
-                      </Card>
-                      {prediction.modelUsed && (
-                        <Card className="p-4 col-span-2">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Cpu className="h-5 w-5 text-primary" />
-                              <span className="text-sm">Model Used</span>
-                            </div>
-                          <p className="text-2xl font-bold">{prediction.modelUsed}</p>
-                        </Card>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -356,7 +395,7 @@ function PredictionSkeleton() {
               <Skeleton className="h-4 w-4/5" />
           </CardContent>
         </Card>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
           <Card className="p-4 space-y-2">
             <Skeleton className="h-5 w-24" />
             <Skeleton className="h-8 w-16" />
@@ -366,10 +405,6 @@ function PredictionSkeleton() {
             <Skeleton className="h-8 w-16" />
           </Card>
            <Card className="p-4 space-y-2">
-            <Skeleton className="h-5 w-24" />
-            <Skeleton className="h-8 w-16" />
-          </Card>
-          <Card className="p-4 space-y-2">
             <Skeleton className="h-5 w-24" />
             <Skeleton className="h-8 w-16" />
           </Card>

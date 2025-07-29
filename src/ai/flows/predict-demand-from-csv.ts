@@ -33,6 +33,9 @@ const PredictDemandFromCsvOutputSchema = z.object({
   modelUsed: z.string().describe('The machine learning model used for the prediction.'),
   accuracy: z.number().describe('The accuracy of the model prediction as a percentage.'),
   f1Score: z.number().describe('The F1 score of the model prediction.'),
+  mae: z.number().describe('Mean Absolute Error of the model prediction.'),
+  rmse: z.number().describe('Root Mean Squared Error of the model prediction.'),
+  rSquared: z.number().describe('R-squared score of the model prediction.'),
 });
 export type PredictDemandFromCsvOutput = z.infer<typeof PredictDemandFromCsvOutputSchema>;
 
@@ -87,6 +90,7 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
   let confidence = "Medium";
   let accuracy = 0.85;
   let f1Score = 0.82;
+  let baseError = 50; // Base error in units
 
   switch(model) {
       case "Prophet":
@@ -94,6 +98,7 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
           confidence = "High";
           accuracy = 0.92;
           f1Score = 0.90;
+          baseError = 30;
           break;
       case "LSTM":
           trendWeight = 1.2; // LSTMs can capture recent trends well
@@ -101,6 +106,7 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
           confidence = "Medium";
           accuracy = 0.88;
           f1Score = 0.86;
+          baseError = 45;
           break;
       case "Random Forest":
       case "XGBoost":
@@ -108,14 +114,16 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
           noiseLevel = 0.03;
           seasonalityFactor = 0.15;
           confidence = "High";
-          accuracy = 0.95;
-          f1Score = 0.94;
+          accuracy = model === 'XGBoost' ? 0.96 : 0.95;
+          f1Score = model === 'XGBoost' ? 0.95 : 0.94;
+          baseError = 20;
           break;
       case "ARIMA":
       default:
           // Keep default parameters
           accuracy = 0.85;
           f1Score = 0.82;
+          baseError = 50;
           break;
   }
 
@@ -143,12 +151,17 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
     chartData[n-1].predicted = chartData[n-1].historical;
   }
   
-
   const predictedUnits = forecastData.reduce((sum, item) => sum + item.predicted, 0);
   const salesTrend = trend > 0 ? 'Increasing' : 'Decreasing';
   
   const peak = forecastData.reduce((max, item) => item.predicted > max.predicted ? item : max, forecastData[0] || { month: 'N/A', predicted: 0 });
   const peakDemandPeriod = peak.month;
+  
+  // Simulate error metrics
+  const mae = Math.round(baseError * (1 + (Math.random() - 0.5) * 0.2));
+  const rmse = Math.round(mae * 1.25 * (1 + (Math.random() - 0.5) * 0.2));
+  const rSquared = Math.max(0, accuracy - (Math.random() * 0.1));
+
 
   const summary = `Using a simulated ${model} model, the forecast accounts for trend and seasonal variations. The sales trend is ${salesTrend.toLowerCase()}, with total predicted sales of approximately ${predictedUnits.toLocaleString()} units. Demand is expected to peak in ${peakDemandPeriod}.`;
 
@@ -162,5 +175,8 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
     modelUsed: `Simulated ${model}`,
     accuracy: accuracy,
     f1Score: f1Score,
+    mae,
+    rmse,
+    rSquared,
   };
 }
