@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, TestTube2, DatabaseZap } from 'lucide-react';
 import { DataOverview, type DataStats } from './data-overview';
 import { ColumnInformation, type ColumnInfo } from './column-information';
-import { Configuration } from './configuration';
+import { Configuration, type MissingValueStrategy } from './configuration';
 import { useRouter } from 'next/navigation';
 
 
@@ -22,14 +22,24 @@ export type PreprocessingData = {
 export default function PreprocessingClient() {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState('');
-  const [data, setData] = useState<PreprocessingData | null>(null);
+  const [originalData, setOriginalData] = useState<PreprocessingData | null>(null);
+  const [processedData, setProcessedData] = useState<PreprocessingData | null>(null);
+
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
 
-  const processCsvData = (csvString: string, name: string) => {
+  const analyzeCsv = (csvString: string, name: string): PreprocessingData => {
       const lines = csvString.trim().split('\n');
+      if (lines.length <= 1) {
+          return {
+              stats: { rows: 0, columns: 0, missing: 0, duplicates: 0, fileName: name },
+              columns: [],
+              csvData: csvString,
+          }
+      }
+
       const header = lines[0].split(',').map(h => h.trim());
       const rows = lines.slice(1);
 
@@ -54,10 +64,12 @@ export default function PreprocessingClient() {
 
       rows.forEach(line => {
           const values = line.split(',');
+          let hasMissingValueInRow = false;
           values.forEach((val, i) => {
-              if (!val || val.trim() === '') {
+              if (i < header.length && (!val || val.trim() === '')) {
                   if(!columnMissingCount[i]) columnMissingCount[i] = 0;
                   columnMissingCount[i]++;
+                  hasMissingValueInRow = true;
               }
           });
       });
@@ -75,9 +87,13 @@ export default function PreprocessingClient() {
               col.status = 'Some Missing';
           }
       });
+      
+       // Check for duplicate rows
+      const rowSet = new Set(rows);
+      stats.duplicates = rows.length - rowSet.size;
 
-      setData({ stats, columns, csvData: csvString });
-      sessionStorage.setItem('preprocessedData', JSON.stringify({ stats, columns, csvData: csvString }));
+
+      return { stats, columns, csvData: csvString };
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,7 +106,9 @@ export default function PreprocessingClient() {
         const reader = new FileReader();
         reader.onload = async (e) => {
             const text = e.target?.result as string;
-            processCsvData(text, selectedFile.name);
+            const analysis = analyzeCsv(text, selectedFile.name);
+            setOriginalData(analysis);
+            setProcessedData(analysis); // Initially, processed is same as original
         };
         reader.readAsText(selectedFile);
         toast({
@@ -116,7 +134,9 @@ export default function PreprocessingClient() {
         const name = "sample-climate-data.csv";
         setFile(new File([text], name, { type: "text/csv" }));
         setFileName(name);
-        processCsvData(text, name);
+        const analysis = analyzeCsv(text, name);
+        setOriginalData(analysis);
+        setProcessedData(analysis);
          toast({
           title: 'Sample Data Loaded',
           description: 'The sample climate data has been loaded and analyzed.',
@@ -130,14 +150,40 @@ export default function PreprocessingClient() {
     }
   }
 
-  const handleStartForecasting = () => {
-    // Logic to start the forecasting process with the selected configurations
+  const handleStartForecasting = (strategy: MissingValueStrategy) => {
+    if (!originalData) return;
+
+    setLoading(true);
+
+    let finalCsvData = originalData.csvData;
+
+    if (strategy === 'drop') {
+      const lines = originalData.csvData.trim().split('\n');
+      const header = lines[0];
+      const dataRows = lines.slice(1);
+      const cleanedRows = dataRows.filter(row => {
+        const values = row.split(',');
+        return values.every(val => val && val.trim() !== '');
+      });
+      finalCsvData = [header, ...cleanedRows].join('\n');
+    }
+
+    const finalAnalysis = analyzeCsv(finalCsvData, originalData.stats.fileName);
+    setProcessedData(finalAnalysis);
+    sessionStorage.setItem('preprocessedData', JSON.stringify(finalAnalysis));
+
     toast({
-        title: "Redirecting to Forecast",
-        description: "Moving to the demand forecasting page..."
+        title: "Preprocessing Complete",
+        description: `Data processed using '${strategy}' strategy. Redirecting to Forecast page...`
     });
-    router.push('/external-data');
+    
+    setTimeout(() => {
+        router.push('/external-data');
+        setLoading(false);
+    }, 1500);
   }
+  
+  const displayData = processedData || originalData;
 
   return (
     <div className="space-y-6">
@@ -175,11 +221,11 @@ export default function PreprocessingClient() {
           </CardContent>
         </Card>
 
-        {data && (
+        {displayData && (
             <div className='space-y-6'>
-                <DataOverview stats={data.stats} />
-                <ColumnInformation columns={data.columns} />
-                <Configuration onStart={handleStartForecasting} />
+                <DataOverview stats={displayData.stats} />
+                <ColumnInformation columns={displayData.columns} />
+                <Configuration onStart={handleStartForecasting} isLoading={loading} />
             </div>
         )}
     </div>
