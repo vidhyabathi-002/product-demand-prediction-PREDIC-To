@@ -11,6 +11,7 @@ import { DataOverview, type DataStats } from './data-overview';
 import { ColumnInformation, type ColumnInfo } from './column-information';
 import { Configuration, type MissingValueStrategy } from './configuration';
 import { useRouter } from 'next/navigation';
+import { DataPreview } from './data-preview';
 
 
 export type PreprocessingData = {
@@ -167,7 +168,8 @@ export default function PreprocessingClient() {
       const dataRows = lines.slice(1);
       const cleanedRows = dataRows.filter(row => {
         const values = row.split(',');
-        return values.every(val => val && val.trim() !== '');
+        // Ensure the row has the same number of columns as the header, and no value is empty
+        return values.length === header.split(',').length && values.every(val => val && val.trim() !== '');
       });
       finalCsvData = [header, ...cleanedRows].join('\n');
     }
@@ -185,7 +187,7 @@ export default function PreprocessingClient() {
     setLoading(false);
   }
   
-  const displayData = processedData || originalData;
+  const displayData = isProcessed ? processedData : originalData;
 
   return (
     <div className="space-y-6">
@@ -229,21 +231,24 @@ export default function PreprocessingClient() {
                 <ColumnInformation columns={displayData.columns} />
                 <Configuration onStart={handleStartPreprocessing} isLoading={loading} />
 
-                {isProcessed && (
-                  <Card>
-                    <CardHeader>
-                        <CardTitle>Ready for Next Step</CardTitle>
-                        <CardDescription>
-                            Your data has been successfully preprocessed. You can now move on to the forecasting stage.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardFooter>
-                        <Button onClick={() => router.push('/external-data')}>
-                            Proceed to Forecast
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    </CardFooter>
-                  </Card>
+                {isProcessed && processedData && (
+                    <>
+                    <DataPreview csvData={processedData.csvData} />
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Ready for Next Step</CardTitle>
+                            <CardDescription>
+                                Your data has been successfully preprocessed. You can now move on to the forecasting stage.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardFooter>
+                            <Button onClick={() => router.push('/external-data')}>
+                                Proceed to Forecast
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                    </>
                 )}
             </div>
         )}
