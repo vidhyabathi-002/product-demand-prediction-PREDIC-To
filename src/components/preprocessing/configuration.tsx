@@ -11,14 +11,31 @@ import { Switch } from '../ui/switch';
 import { Separator } from '../ui/separator';
 
 export type MissingValueStrategy = 'drop' | 'mean' | 'median' | 'interpolate';
+export interface PreprocessingConfig {
+    missingValueStrategy: MissingValueStrategy;
+    scaleData: boolean;
+    featureEngineering: boolean;
+}
 
 interface ConfigurationProps {
-    onStart: (strategy: MissingValueStrategy) => void;
+    onStart: (config: PreprocessingConfig) => void;
     isLoading: boolean;
 }
 
 export function Configuration({ onStart, isLoading }: ConfigurationProps) {
-  const [missingValueStrategy, setMissingValueStrategy] = useState<MissingValueStrategy>('drop');
+  const [config, setConfig] = useState<PreprocessingConfig>({
+    missingValueStrategy: 'drop',
+    scaleData: false,
+    featureEngineering: false
+  });
+
+  const handleStrategyChange = (value: string) => {
+    setConfig(prev => ({ ...prev, missingValueStrategy: value as MissingValueStrategy }));
+  };
+
+  const handleSwitchChange = (key: 'scaleData' | 'featureEngineering', value: boolean) => {
+    setConfig(prev => ({ ...prev, [key]: value }));
+  };
 
   return (
     <Card>
@@ -30,22 +47,22 @@ export function Configuration({ onStart, isLoading }: ConfigurationProps) {
         <div className="space-y-4">
           <h3 className="font-semibold text-base">Handle Missing Values</h3>
           <p className="text-sm text-muted-foreground">Choose a strategy to deal with empty cells in your data.</p>
-          <RadioGroup value={missingValueStrategy} onValueChange={(val) => setMissingValueStrategy(val as MissingValueStrategy)}>
+          <RadioGroup value={config.missingValueStrategy} onValueChange={handleStrategyChange}>
             <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
               <RadioGroupItem value="drop" id="drop" />
               <Label htmlFor="drop" className="font-normal cursor-pointer flex-1">Drop rows with missing values</Label>
             </div>
-             <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 cursor-not-allowed">
-              <RadioGroupItem value="mean" id="mean" disabled />
-              <Label htmlFor="mean" className="font-normal text-muted-foreground/80 cursor-not-allowed flex-1">Fill with mean/mode (Coming Soon)</Label>
+             <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+              <RadioGroupItem value="mean" id="mean" />
+              <Label htmlFor="mean" className="font-normal cursor-pointer flex-1">Fill with mean/mode</Label>
             </div>
-             <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 cursor-not-allowed">
-              <RadioGroupItem value="median" id="median" disabled />
-              <Label htmlFor="median" className="font-normal text-muted-foreground/80 cursor-not-allowed flex-1">Fill with median/mode (Coming Soon)</Label>
+             <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+              <RadioGroupItem value="median" id="median" />
+              <Label htmlFor="median" className="font-normal cursor-pointer flex-1">Fill with median/mode</Label>
             </div>
-             <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50 cursor-not-allowed">
-              <RadioGroupItem value="interpolate" id="interpolate" disabled />
-              <Label htmlFor="interpolate" className="font-normal text-muted-foreground/80 cursor-not-allowed flex-1">Interpolate (Coming Soon)</Label>
+             <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-muted/50">
+              <RadioGroupItem value="interpolate" id="interpolate" />
+              <Label htmlFor="interpolate" className="font-normal cursor-pointer flex-1">Interpolate</Label>
             </div>
           </RadioGroup>
         </div>
@@ -53,24 +70,32 @@ export function Configuration({ onStart, isLoading }: ConfigurationProps) {
          <div className="space-y-4">
           <h3 className="font-semibold text-base">Advanced Preprocessing</h3>
           <p className="text-sm text-muted-foreground">Apply transformations to improve model performance.</p>
-           <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-not-allowed">
-                <Label htmlFor="scale-data" className="font-normal text-muted-foreground/80 cursor-not-allowed">
+           <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50">
+                <Label htmlFor="scale-data" className="font-normal">
                     Scale Data (e.g., Normalization)
-                    <p className="text-xs text-muted-foreground/60">Ensure all features are on a comparable scale.</p>
+                    <p className="text-xs text-muted-foreground">Ensure all features are on a comparable scale.</p>
                 </Label>
-                <Switch id="scale-data" disabled />
+                <Switch 
+                  id="scale-data" 
+                  checked={config.scaleData}
+                  onCheckedChange={(checked) => handleSwitchChange('scaleData', checked)}
+                />
             </div>
-            <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 cursor-not-allowed">
-                <Label htmlFor="feature-engineering" className="font-normal text-muted-foreground/80 cursor-not-allowed">
+            <div className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50">
+                <Label htmlFor="feature-engineering" className="font-normal">
                     Feature Engineering
-                    <p className="text-xs text-muted-foreground/60">Create new features from existing data (e.g., time-based).</p>
+                    <p className="text-xs text-muted-foreground">Create new features from existing data (e.g., time-based).</p>
                 </Label>
-                <Switch id="feature-engineering" disabled />
+                <Switch 
+                  id="feature-engineering"
+                  checked={config.featureEngineering}
+                  onCheckedChange={(checked) => handleSwitchChange('featureEngineering', checked)}
+                />
             </div>
         </div>
       </CardContent>
       <CardFooter className="border-t pt-6">
-        <Button onClick={() => onStart(missingValueStrategy)} disabled={isLoading}>
+        <Button onClick={() => onStart(config)} disabled={isLoading}>
           {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (

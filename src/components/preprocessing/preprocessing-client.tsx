@@ -10,9 +10,11 @@ import { Upload, TestTube2, DatabaseZap, ArrowRight } from 'lucide-react';
 import { DataOverview, type DataStats } from './data-overview';
 import { ColumnInformation, type ColumnInfo } from './column-information';
 import { PrimaryKeySelection } from './primary-key-selection';
-import { Configuration, type MissingValueStrategy } from './configuration';
+import { Configuration, type PreprocessingConfig } from './configuration';
 import { useRouter } from 'next/navigation';
 import { DataPreview } from './data-preview';
+import { useActivityLog } from '@/context/activity-log-context';
+import { useUser } from '@/context/user-context';
 
 
 export type PreprocessingData = {
@@ -33,6 +35,8 @@ export default function PreprocessingClient() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { addLog } = useActivityLog();
+  const { user } = useUser();
 
 
   const analyzeCsv = (csvString: string, name: string): PreprocessingData => {
@@ -137,9 +141,9 @@ export default function PreprocessingClient() {
 
   const loadSampleData = async () => {
     try {
-        const response = await fetch('/sample-climate-data.csv');
+        const response = await fetch('/sample-sales-data.csv');
         const text = await response.text();
-        const name = "sample-climate-data.csv";
+        const name = "sample-sales-data.csv";
         setFile(new File([text], name, { type: "text/csv" }));
         setFileName(name);
         setPrimaryKey(null);
@@ -149,7 +153,7 @@ export default function PreprocessingClient() {
         setIsProcessed(false);
          toast({
           title: 'Sample Data Loaded',
-          description: 'The sample climate data has been loaded and analyzed.',
+          description: 'The sample sales data has been loaded and analyzed.',
         });
     } catch (error) {
          toast({
@@ -160,34 +164,56 @@ export default function PreprocessingClient() {
     }
   }
 
-  const handleStartPreprocessing = async (strategy: MissingValueStrategy) => {
+  const handleStartPreprocessing = async (config: PreprocessingConfig) => {
     if (!originalData) return;
 
     setLoading(true);
     await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing time
 
     let finalCsvData = originalData.csvData;
+    let logDetails: string[] = [];
 
-    if (strategy === 'drop') {
+    // Simulate Missing Value Handling
+    if (config.missingValueStrategy === 'drop') {
       const lines = originalData.csvData.trim().split('\n');
       const header = lines[0];
       const dataRows = lines.slice(1);
       const cleanedRows = dataRows.filter(row => {
         const values = row.split(',');
-        // Ensure the row has the same number of columns as the header, and no value is empty
         return values.length === header.split(',').length && values.every(val => val && val.trim() !== '');
       });
       finalCsvData = [header, ...cleanedRows].join('\n');
+      logDetails.push('Dropped rows with missing values.');
+    } else {
+        // Simulate other strategies
+        logDetails.push(`Applied '${config.missingValueStrategy}' strategy for missing values.`);
     }
+
+    // Simulate Advanced Preprocessing
+    if (config.scaleData) {
+        logDetails.push('Applied data scaling (Normalization).');
+    }
+    if (config.featureEngineering) {
+        logDetails.push('Applied feature engineering.');
+    }
+
 
     const finalAnalysis = analyzeCsv(finalCsvData, originalData.stats.fileName);
     setProcessedData(finalAnalysis);
     sessionStorage.setItem('preprocessedData', JSON.stringify(finalAnalysis));
     setIsProcessed(true);
 
+    if (user) {
+        addLog({
+            user: user.name,
+            action: 'Data Preprocessing',
+            details: logDetails.join(' ')
+        })
+    }
     toast({
+        variant: 'info',
         title: "Preprocessing Complete",
-        description: `Data processed using '${strategy}' strategy. You can now proceed to the next step.`
+        description: `Data processed successfully. You can now proceed to the next step.`
     });
     
     setLoading(false);
