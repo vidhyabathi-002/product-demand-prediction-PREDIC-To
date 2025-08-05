@@ -238,9 +238,7 @@ export default function PreprocessingClient() {
                   onSelect={setPrimaryKey}
                 />
                 
-                {primaryKey && (
-                  <Configuration onStart={handleStartPreprocessing} isLoading={loading} />
-                )}
+                <Configuration onStart={handleStartPreprocessing} isLoading={loading} />
 
                 {isProcessed && processedData && (
                     <>
