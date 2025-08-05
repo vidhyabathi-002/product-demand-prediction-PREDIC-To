@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, TestTube2, DatabaseZap, ArrowRight } from 'lucide-react';
 import { DataOverview, type DataStats } from './data-overview';
 import { ColumnInformation, type ColumnInfo } from './column-information';
+import { PrimaryKeySelection } from './primary-key-selection';
 import { Configuration, type MissingValueStrategy } from './configuration';
 import { useRouter } from 'next/navigation';
 import { DataPreview } from './data-preview';
@@ -25,6 +26,7 @@ export default function PreprocessingClient() {
   const [fileName, setFileName] = useState('');
   const [originalData, setOriginalData] = useState<PreprocessingData | null>(null);
   const [processedData, setProcessedData] = useState<PreprocessingData | null>(null);
+  const [primaryKey, setPrimaryKey] = useState<string | null>(null);
   const [isProcessed, setIsProcessed] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -104,6 +106,7 @@ export default function PreprocessingClient() {
       if (selectedFile.type === 'text/csv') {
         setFile(selectedFile);
         setFileName(selectedFile.name);
+        setPrimaryKey(null); // Reset primary key on new file
         
         const reader = new FileReader();
         reader.onload = async (e) => {
@@ -137,6 +140,7 @@ export default function PreprocessingClient() {
         const name = "sample-climate-data.csv";
         setFile(new File([text], name, { type: "text/csv" }));
         setFileName(name);
+        setPrimaryKey(null);
         const analysis = analyzeCsv(text, name);
         setOriginalData(analysis);
         setProcessedData(analysis);
@@ -229,7 +233,14 @@ export default function PreprocessingClient() {
             <div className='space-y-6'>
                 <DataOverview stats={displayData.stats} />
                 <ColumnInformation columns={displayData.columns} />
-                <Configuration onStart={handleStartPreprocessing} isLoading={loading} />
+                <PrimaryKeySelection 
+                  columns={displayData.columns.map(c => c.name)} 
+                  onSelect={setPrimaryKey}
+                />
+                
+                {primaryKey && (
+                  <Configuration onStart={handleStartPreprocessing} isLoading={loading} />
+                )}
 
                 {isProcessed && processedData && (
                     <>
