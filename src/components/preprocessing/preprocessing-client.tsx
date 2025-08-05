@@ -3,10 +3,10 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, TestTube2, DatabaseZap } from 'lucide-react';
+import { Upload, TestTube2, DatabaseZap, ArrowRight } from 'lucide-react';
 import { DataOverview, type DataStats } from './data-overview';
 import { ColumnInformation, type ColumnInfo } from './column-information';
 import { Configuration, type MissingValueStrategy } from './configuration';
@@ -24,6 +24,7 @@ export default function PreprocessingClient() {
   const [fileName, setFileName] = useState('');
   const [originalData, setOriginalData] = useState<PreprocessingData | null>(null);
   const [processedData, setProcessedData] = useState<PreprocessingData | null>(null);
+  const [isProcessed, setIsProcessed] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -109,6 +110,7 @@ export default function PreprocessingClient() {
             const analysis = analyzeCsv(text, selectedFile.name);
             setOriginalData(analysis);
             setProcessedData(analysis); // Initially, processed is same as original
+            setIsProcessed(false); // Reset processed state
         };
         reader.readAsText(selectedFile);
         toast({
@@ -137,6 +139,7 @@ export default function PreprocessingClient() {
         const analysis = analyzeCsv(text, name);
         setOriginalData(analysis);
         setProcessedData(analysis);
+        setIsProcessed(false);
          toast({
           title: 'Sample Data Loaded',
           description: 'The sample climate data has been loaded and analyzed.',
@@ -150,10 +153,11 @@ export default function PreprocessingClient() {
     }
   }
 
-  const handleStartForecasting = (strategy: MissingValueStrategy) => {
+  const handleStartPreprocessing = async (strategy: MissingValueStrategy) => {
     if (!originalData) return;
 
     setLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing time
 
     let finalCsvData = originalData.csvData;
 
@@ -171,16 +175,14 @@ export default function PreprocessingClient() {
     const finalAnalysis = analyzeCsv(finalCsvData, originalData.stats.fileName);
     setProcessedData(finalAnalysis);
     sessionStorage.setItem('preprocessedData', JSON.stringify(finalAnalysis));
+    setIsProcessed(true);
 
     toast({
         title: "Preprocessing Complete",
-        description: `Data processed using '${strategy}' strategy. Redirecting to Forecast page...`
+        description: `Data processed using '${strategy}' strategy. You can now proceed to forecasting.`
     });
     
-    setTimeout(() => {
-        router.push('/external-data');
-        setLoading(false);
-    }, 1500);
+    setLoading(false);
   }
   
   const displayData = processedData || originalData;
@@ -225,7 +227,24 @@ export default function PreprocessingClient() {
             <div className='space-y-6'>
                 <DataOverview stats={displayData.stats} />
                 <ColumnInformation columns={displayData.columns} />
-                <Configuration onStart={handleStartForecasting} isLoading={loading} />
+                <Configuration onStart={handleStartPreprocessing} isLoading={loading} />
+
+                {isProcessed && (
+                  <Card>
+                    <CardHeader>
+                        <CardTitle>Ready for Next Step</CardTitle>
+                        <CardDescription>
+                            Your data has been successfully preprocessed. You can now move on to the forecasting stage.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                        <Button onClick={() => router.push('/external-data')}>
+                            Proceed to Forecast
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </CardFooter>
+                  </Card>
+                )}
             </div>
         )}
     </div>

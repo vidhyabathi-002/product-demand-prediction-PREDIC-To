@@ -67,7 +67,7 @@ export function Configuration({ onStart, isLoading }: ConfigurationProps) {
           ) : (
               <Play className="mr-2 h-4 w-4" />
           )}
-          {isLoading ? 'Processing...' : 'Start Forecasting'}
+          {isLoading ? 'Processing...' : 'Start Preprocessing'}
         </Button>
       </CardFooter>
     </Card>
