@@ -19,6 +19,7 @@ export type PreprocessingData = {
     stats: DataStats;
     columns: ColumnInfo[];
     csvData: string;
+    fileName: string;
 };
 
 export default function PreprocessingClient() {
@@ -41,6 +42,7 @@ export default function PreprocessingClient() {
               stats: { rows: 0, columns: 0, missing: 0, duplicates: 0, fileName: name },
               columns: [],
               csvData: csvString,
+              fileName: name,
           }
       }
 
@@ -97,7 +99,7 @@ export default function PreprocessingClient() {
       stats.duplicates = rows.length - rowSet.size;
 
 
-      return { stats, columns, csvData: csvString };
+      return { stats, columns, csvData: csvString, fileName: name };
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +187,7 @@ export default function PreprocessingClient() {
 
     toast({
         title: "Preprocessing Complete",
-        description: `Data processed using '${strategy}' strategy. You can now proceed to forecasting.`
+        description: `Data processed using '${strategy}' strategy. You can now proceed to the next step.`
     });
     
     setLoading(false);
@@ -247,12 +249,12 @@ export default function PreprocessingClient() {
                         <CardHeader>
                             <CardTitle>Ready for Next Step</CardTitle>
                             <CardDescription>
-                                Your data has been successfully preprocessed. You can now move on to the forecasting stage.
+                                Your data has been successfully preprocessed. You can now move on to the train/test split stage.
                             </CardDescription>
                         </CardHeader>
                         <CardFooter>
-                            <Button onClick={() => router.push('/external-data')}>
-                                Proceed to Forecast
+                            <Button onClick={() => router.push('/train-test-split')}>
+                                Proceed to Train/Test Split
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </CardFooter>
