@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Users, User } from "lucide-react";
+import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Users, DatabaseZap } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -18,16 +18,17 @@ import { useUser } from "@/context/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/analytics", "/reports", "/settings", "/profile"],
+  "Product Manager": ["/dashboard", "/analytics", "/reports", "/settings", "/profile", "/preprocessing", "/external-data"],
   "Marketing Team": ["/dashboard", "/analytics", "/settings", "/profile"],
-  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports", "/settings", "/profile"],
-  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics", "/settings", "/profile"],
+  "Data Scientist": ["/dashboard", "/analytics", "/preprocessing", "/external-data", "/reports", "/settings", "/profile"],
+  "Administrator": ["/dashboard", "/admin", "/preprocessing", "/external-data", "/reports", "/analytics", "/settings", "/profile"],
 };
 
 const allMenuItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/admin", label: "User Management", icon: Users },
-    { href: "/external-data", label: "External Data", icon: UploadCloud },
+    { href: "/preprocessing", label: "Preprocessing", icon: DatabaseZap },
+    { href: "/external-data", label: "Forecasting", icon: UploadCloud },
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/analytics", label: "Analytics", icon: PieChart },
 ];

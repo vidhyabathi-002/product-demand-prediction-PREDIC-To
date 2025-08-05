@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useState } from 'react';
-import { Upload, BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2, Target, Award } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2, Target, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { predictDemandFromCsv, type PredictDemandFromCsvOutput, type ModelType } from '@/ai/flows/predict-demand-from-csv';
 import { Skeleton } from '../ui/skeleton';
@@ -43,9 +42,7 @@ type PerformanceMetricKey = keyof typeof performanceMetricsConfig;
 
 
 export default function UploadClient() {
-  const [file, setFile] = useState<File | null>(null);
   const [csvString, setCsvString] = useState<string>('');
-  const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
   const [prediction, setPrediction] = useState<PredictDemandFromCsvOutput | null>(null);
   const [selectedModel, setSelectedModel] = useState<ModelType>('ARIMA');
@@ -55,65 +52,29 @@ export default function UploadClient() {
   const { addLog } = useActivityLog();
   const { user } = useUser();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0];
-    if (selectedFile) {
-      if (selectedFile.type === 'text/csv') {
-        setFile(selectedFile);
-        setFileName(selectedFile.name);
-        setPrediction(null);
-        
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const text = e.target?.result as string;
-            setCsvString(text);
-        };
-        reader.readAsText(selectedFile);
-        sessionStorage.removeItem('predictionReport');
-        toast({
-            variant: 'success',
-            title: 'File Uploaded',
-            description: 'Sales data uploaded successfully!'
-        });
-
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Invalid File Type',
-          description: 'Please upload a CSV file.',
-        });
-      }
+  useEffect(() => {
+    const storedData = sessionStorage.getItem('preprocessedData');
+    if (storedData) {
+        try {
+            const parsedData = JSON.parse(storedData);
+            setCsvString(parsedData.csvData);
+        } catch (e) {
+            console.error("Failed to parse preprocessed data", e);
+            toast({
+                variant: 'destructive',
+                title: 'Data Error',
+                description: 'Could not load preprocessed data. Please go back and upload a file.',
+            });
+        }
     }
-  };
+  }, [toast]);
 
-  const loadSampleData = async () => {
-    try {
-        const response = await fetch('/sample-sales-data.csv');
-        const text = await response.text();
-        setCsvString(text);
-        setFile(new File([text], "sample-sales-data.csv", { type: "text/csv" }));
-        setFileName("sample-sales-data.csv");
-        setPrediction(null);
-        sessionStorage.removeItem('predictionReport');
-         toast({
-          title: 'Sample Data Loaded',
-          description: 'The sample sales data has been loaded. You can now predict demand.',
-        });
-    } catch (error) {
-         toast({
-          variant: 'destructive',
-          title: 'Failed to Load Sample',
-          description: 'Could not load the sample dataset.',
-        });
-    }
-  }
-
-  const handleUpload = async () => {
+  const handlePredict = async () => {
     if (!csvString) {
       toast({
         variant: 'warning',
         title: 'No Data',
-        description: 'Please select a CSV file or load the sample data.',
+        description: 'Please go to the preprocessing page to upload data first.',
       });
       return;
     }
@@ -209,9 +170,9 @@ export default function UploadClient() {
   return (
     <div className="space-y-6">
        <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">External Data</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Forecasting</h1>
         <p className="text-muted-foreground">
-          Upload historical data and select a model to generate a demand forecast.
+          Select a model to generate a demand forecast from your preprocessed data.
         </p>
       </div>
       <div className="space-y-6">
@@ -219,44 +180,27 @@ export default function UploadClient() {
           <CardHeader>
             <CardTitle>Configure Prediction</CardTitle>
             <CardDescription>
-              Upload data and select a model to forecast demand.
+              Select a model to forecast demand using your prepared data.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                <Label>1. Upload Sales Data</Label>
-                <div className="flex gap-2">
-                    <Input id="file-upload" type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
-                    <Button asChild variant="outline" className="w-full">
-                        <label htmlFor="file-upload" className="cursor-pointer flex items-center gap-2">
-                        <Upload className="h-4 w-4" />
-                        <span>{fileName || 'Choose CSV...'}</span>
-                        </label>
-                    </Button>
-                    <Button onClick={loadSampleData} variant="secondary" title="Load Sample Data">
-                        <TestTube2 className="h-4 w-4" />
-                    </Button>
-                </div>
-                </div>
-                 <div className="space-y-2">
-                    <Label>2. Select ML Model</Label>
-                    <RadioGroup value={selectedModel} onValueChange={(value: string) => setSelectedModel(value as ModelType)} className="flex flex-wrap gap-4">
-                        {models.map(model => (
-                            <div key={model.id}>
-                                <RadioGroupItem value={model.id} id={model.id} className="peer sr-only" />
-                                <Label
-                                htmlFor={model.id}
-                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                                >
-                                {model.label}
-                                </Label>
-                            </div>
-                        ))}
-                    </RadioGroup>
-                </div>
+             <div className="space-y-2">
+                <Label>Select ML Model</Label>
+                <RadioGroup value={selectedModel} onValueChange={(value: string) => setSelectedModel(value as ModelType)} className="flex flex-wrap gap-4">
+                    {models.map(model => (
+                        <div key={model.id}>
+                            <RadioGroupItem value={model.id} id={model.id} className="peer sr-only" />
+                            <Label
+                            htmlFor={model.id}
+                            className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                            >
+                            {model.label}
+                            </Label>
+                        </div>
+                    ))}
+                </RadioGroup>
             </div>
-            <Button onClick={handleUpload} disabled={!csvString || loading} className="w-full">
+            <Button onClick={handlePredict} disabled={!csvString || loading} className="w-full">
               {loading ? 'Analyzing...' : 'Predict Demand'}
             </Button>
           </CardContent>
@@ -273,7 +217,7 @@ export default function UploadClient() {
                         </div>
                         <h3 className="text-xl font-semibold">Ready to Forecast</h3>
                         <p className="text-muted-foreground mt-2">
-                            Upload your data or load the sample to see your demand prediction here.
+                            Select a model and click predict to see your demand prediction here.
                         </p>
                     </div>
                 </Card>
@@ -388,7 +332,7 @@ function PredictionSkeleton() {
               <Skeleton className="h-6 w-6 rounded-full" />
               <Skeleton className="h-6 w-40" />
             </CardTitle>
-          </CardHeader>
+          </Header>
           <CardContent className="space-y-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />

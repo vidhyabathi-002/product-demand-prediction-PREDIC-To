@@ -24,10 +24,10 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/analytics", "/reports", "/settings", "/profile"],
+  "Product Manager": ["/dashboard", "/analytics", "/reports", "/settings", "/profile", "/preprocessing", "/external-data"],
   "Marketing Team": ["/dashboard", "/analytics", "/settings", "/profile"],
-  "Data Scientist": ["/dashboard", "/analytics", "/external-data", "/reports", "/settings", "/profile"],
-  "Administrator": ["/dashboard", "/admin", "/external-data", "/reports", "/analytics", "/settings", "/profile"],
+  "Data Scientist": ["/dashboard", "/analytics", "/preprocessing", "/external-data", "/reports", "/settings", "/profile"],
+  "Administrator": ["/dashboard", "/admin", "/preprocessing", "/external-data", "/reports", "/analytics", "/settings", "/profile"],
 };
 
 export function UserProvider({ children }: { children: ReactNode }) {

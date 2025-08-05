@@ -6,7 +6,7 @@ import UploadClient from "@/components/external-data/upload-client";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "External Data",
+  title: "Forecasting",
 };
 
 export default function ExternalDataPage() {
