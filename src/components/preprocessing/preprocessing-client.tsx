@@ -187,7 +187,6 @@ export default function PreprocessingClient() {
     if(config.outlierStrategy !== 'none') logDetails.push(`Simulated outlier handling with '${config.outlierStrategy}'.`);
     if(config.scaleData) logDetails.push('Simulated data scaling (Normalization).');
     if(config.encodingStrategy !== 'none') logDetails.push(`Simulated '${config.encodingStrategy}' encoding.`);
-    if(config.featureEngineering) logDetails.push('Simulated feature engineering.');
 
 
     const finalAnalysis = analyzeCsv(finalCsvData, originalData.stats.fileName);

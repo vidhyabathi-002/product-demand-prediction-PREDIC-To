@@ -18,7 +18,6 @@ export interface PreprocessingConfig {
     missingValueStrategy: MissingValueStrategy;
     outlierStrategy: OutlierStrategy;
     scaleData: boolean;
-    featureEngineering: boolean;
     encodingStrategy: EncodingStrategy;
     removeDuplicates: boolean;
 }
@@ -33,7 +32,6 @@ export function Configuration({ onStart, isLoading }: ConfigurationProps) {
     missingValueStrategy: 'drop',
     outlierStrategy: 'none',
     scaleData: false,
-    featureEngineering: false,
     encodingStrategy: 'none',
     removeDuplicates: true,
   });
@@ -73,7 +71,6 @@ export function Configuration({ onStart, isLoading }: ConfigurationProps) {
              <div className="flex flex-wrap gap-x-6 gap-y-4 pt-2">
                 <div className="flex items-center space-x-2"><Switch id="remove-duplicates" checked={config.removeDuplicates} onCheckedChange={(c) => handleValueChange('removeDuplicates', c)} /><Label htmlFor="remove-duplicates">Remove Duplicates</Label></div>
                 <div className="flex items-center space-x-2"><Switch id="scale-data" checked={config.scaleData} onCheckedChange={(c) => handleValueChange('scaleData', c)} /><Label htmlFor="scale-data">Scale Data (Normalize)</Label></div>
-                <div className="flex items-center space-x-2"><Switch id="feature-engineering" checked={config.featureEngineering} onCheckedChange={(c) => handleValueChange('featureEngineering', c)} /><Label htmlFor="feature-engineering">Feature Engineering</Label></div>
             </div>
         </div>
       </CardContent>
