@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Users, DatabaseZap } from "lucide-react";
+import { Settings, PieChart, FileText, Home, LogOut, UploadCloud, Users, DatabaseZap, Columns3 } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -18,16 +18,17 @@ import { useUser } from "@/context/user-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navConfig = {
-  "Product Manager": ["/dashboard", "/analytics", "/reports", "/settings", "/profile", "/preprocessing", "/external-data"],
+  "Product Manager": ["/dashboard", "/analytics", "/reports", "/settings", "/profile", "/preprocessing", "/train-test-split", "/external-data"],
   "Marketing Team": ["/dashboard", "/analytics", "/settings", "/profile"],
-  "Data Scientist": ["/dashboard", "/analytics", "/preprocessing", "/external-data", "/reports", "/settings", "/profile"],
-  "Administrator": ["/dashboard", "/admin", "/preprocessing", "/external-data", "/reports", "/analytics", "/settings", "/profile"],
+  "Data Scientist": ["/dashboard", "/analytics", "/preprocessing", "/train-test-split", "/external-data", "/reports", "/settings", "/profile"],
+  "Administrator": ["/dashboard", "/admin", "/preprocessing", "/train-test-split", "/external-data", "/reports", "/analytics", "/settings", "/profile"],
 };
 
 const allMenuItems = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/admin", label: "User Management", icon: Users },
     { href: "/preprocessing", label: "Data Preparation", icon: DatabaseZap },
+    { href: "/train-test-split", label: "Train/Test Split", icon: Columns3 },
     { href: "/external-data", label: "Forecasting", icon: UploadCloud },
     { href: "/reports", label: "Reports", icon: FileText },
     { href: "/analytics", label: "Analytics", icon: PieChart },

@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { DataPreview } from './data-preview';
 import { useActivityLog } from '@/context/activity-log-context';
 import { useUser } from '@/context/user-context';
+import { PrimaryKeySelection } from './primary-key-selection';
 
 
 export type PreprocessingData = {
@@ -35,6 +36,7 @@ export default function PreprocessingClient() {
   const router = useRouter();
   const { addLog } = useActivityLog();
   const { user } = useUser();
+  const [primaryKey, setPrimaryKey] = useState<string>('');
 
 
   const analyzeCsv = (csvString: string, name: string): PreprocessingData => {
@@ -72,12 +74,10 @@ export default function PreprocessingClient() {
 
       rows.forEach(line => {
           const values = line.split(',');
-          let hasMissingValueInRow = false;
           values.forEach((val, i) => {
               if (i < header.length && (!val || val.trim() === '')) {
                   if(!columnMissingCount[i]) columnMissingCount[i] = 0;
                   columnMissingCount[i]++;
-                  hasMissingValueInRow = true;
               }
           });
       });
@@ -159,7 +159,7 @@ export default function PreprocessingClient() {
     }
   }
 
-  const handleProcessAndSplit = async (config: PreprocessingConfig) => {
+  const handleProcess = async (config: PreprocessingConfig) => {
     if (!originalData) return;
 
     setLoading(true);
@@ -193,9 +193,13 @@ export default function PreprocessingClient() {
     const finalAnalysis = analyzeCsv(finalCsvData, originalData.stats.fileName);
     setProcessedData(finalAnalysis);
     
-    // Store processed data and split config for the next page
+    // Store processed data for the next page
     sessionStorage.setItem('preprocessedData', JSON.stringify(finalAnalysis));
-    sessionStorage.setItem('splitConfig', JSON.stringify(config));
+    if (primaryKey) {
+        sessionStorage.setItem('primaryKey', primaryKey);
+    } else {
+        sessionStorage.removeItem('primaryKey');
+    }
 
     setIsProcessed(true);
 
@@ -203,13 +207,13 @@ export default function PreprocessingClient() {
         addLog({
             user: user.name,
             action: 'Data Preparation',
-            details: logDetails.join(' ') + ` Split data with ${config.testSize}% test size.`
+            details: logDetails.join(' ')
         })
     }
     toast({
         variant: 'info',
-        title: "Pipeline Complete",
-        description: `Data processed and split successfully. You can now proceed to forecasting.`
+        title: "Preprocessing Complete",
+        description: `Data processed successfully. You can now proceed to train/test split.`
     });
     
     setLoading(false);
@@ -257,8 +261,8 @@ export default function PreprocessingClient() {
             <div className='space-y-6'>
                 <DataOverview stats={displayData.stats} />
                 <ColumnInformation columns={displayData.columns} />
-                
-                <Configuration onStart={handleProcessAndSplit} isLoading={loading} preprocessedData={displayData} />
+                <PrimaryKeySelection columns={displayData.columns.map(c => c.name)} onSelect={setPrimaryKey} />
+                <Configuration onStart={handleProcess} isLoading={loading} />
 
                 {isProcessed && processedData && (
                     <>
@@ -267,12 +271,12 @@ export default function PreprocessingClient() {
                         <CardHeader>
                             <CardTitle>Ready for Next Step</CardTitle>
                             <CardDescription>
-                                Your data has been successfully prepared and split. You can now move on to forecasting.
+                                Your data has been successfully prepared. You can now move on to splitting your data for training and testing.
                             </CardDescription>
                         </CardHeader>
                         <CardFooter>
-                            <Button onClick={() => router.push('/external-data')}>
-                                Proceed to Forecasting
+                            <Button onClick={() => router.push('/train-test-split')}>
+                                Proceed to Train/Test Split
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </CardFooter>
