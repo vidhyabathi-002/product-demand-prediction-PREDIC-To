@@ -51,7 +51,7 @@ export default function PreprocessingClient() {
       }
 
       const header = lines[0].split(',').map(h => h.trim());
-      const rows = lines.slice(1);
+      const rows = lines.slice(1).map(line => line.split(','));
 
       const stats: DataStats = {
           rows: rows.length,
@@ -73,8 +73,7 @@ export default function PreprocessingClient() {
       let columnsWithMissing = 0;
 
       rows.forEach(line => {
-          const values = line.split(',');
-          values.forEach((val, i) => {
+          line.forEach((val, i) => {
               if (i < header.length && (!val || val.trim() === '')) {
                   if(!columnMissingCount[i]) columnMissingCount[i] = 0;
                   columnMissingCount[i]++;
@@ -94,13 +93,24 @@ export default function PreprocessingClient() {
           if (missingCount > 0) {
               col.status = 'Some Missing';
           }
+           // Simple data type inference
+          const sampleValue = rows.find(r => r[i] && r[i].trim() !== '')?.[i];
+          if (sampleValue) {
+             if (!isNaN(Number(sampleValue))) {
+                 col.dataType = 'number';
+             } else if (!isNaN(Date.parse(sampleValue))) {
+                 col.dataType = 'date';
+             } else {
+                 col.dataType = 'string';
+             }
+          }
       });
       
-      const rowSet = new Set(rows);
+      const rowSet = new Set(rows.map(r => r.join(',')));
       stats.duplicates = rows.length - rowSet.size;
 
 
-      return { stats, columns, csvData: csvString, fileName: name };
+      return { stats, columns, csvData: [header.join(','), ...rows.map(r=>r.join(','))].join('\n'), fileName: name };
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,38 +173,153 @@ export default function PreprocessingClient() {
     if (!originalData) return;
 
     setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500)); 
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
-    let finalCsvData = originalData.csvData;
     let logDetails: string[] = [];
     
-    // Simulate all the preprocessing steps
-    if (config.missingValueStrategy === 'drop') {
-      const lines = originalData.csvData.trim().split('\n');
-      const header = lines[0];
-      const dataRows = lines.slice(1);
-      const cleanedRows = dataRows.filter(row => {
-        const values = row.split(',');
-        return values.length === header.split(',').length && values.every(val => val && val.trim() !== '');
-      });
-      finalCsvData = [header, ...cleanedRows].join('\n');
-      logDetails.push('Dropped rows with missing values.');
-    } else {
-        logDetails.push(`Simulated '${config.missingValueStrategy}' for missing values.`);
+    // --- PARSE CSV ---
+    const lines = originalData.csvData.trim().split('\n');
+    const header = lines[0].split(',').map(h => h.trim());
+    let data = lines.slice(1).map(line => line.split(',').map(v => v.trim()));
+
+    // --- 1. REMOVE DUPLICATES ---
+    if (config.removeDuplicates) {
+        const rowSet = new Set<string>();
+        const uniqueData: string[][] = [];
+        data.forEach(row => {
+            const rowString = row.join(',');
+            if (!rowSet.has(rowString)) {
+                rowSet.add(rowString);
+                uniqueData.push(row);
+            }
+        });
+        if(data.length > uniqueData.length) {
+          logDetails.push(`Removed ${data.length - uniqueData.length} duplicate rows.`);
+        }
+        data = uniqueData;
     }
 
-    if(config.removeDuplicates) logDetails.push('Simulated duplicate removal.');
-    if(config.outlierStrategy !== 'none') logDetails.push(`Simulated outlier handling with '${config.outlierStrategy}'.`);
-    if(config.scaleData) logDetails.push('Simulated data scaling (Normalization).');
-    if(config.encodingStrategy !== 'none') logDetails.push(`Simulated '${config.encodingStrategy}' encoding.`);
+    // --- 2. HANDLE MISSING VALUES ---
+    if (config.missingValueStrategy !== 'none') {
+        const columnData: (number | null)[][] = header.map(() => []);
+        data.forEach(row => {
+            row.forEach((cell, i) => {
+                const num = cell === '' ? null : parseFloat(cell);
+                if (originalData.columns[i].dataType === 'number') {
+                    columnData[i].push(isNaN(num as any) ? null : num);
+                }
+            });
+        });
 
+        if (config.missingValueStrategy === 'drop') {
+            data = data.filter(row => row.every(cell => cell !== ''));
+            logDetails.push('Dropped rows with missing values.');
+        } else {
+             header.forEach((_, colIndex) => {
+                if(originalData.columns[colIndex].dataType !== 'number') return;
+                
+                let fillValue: number | undefined;
+                const validValues = columnData[colIndex].filter(v => v !== null) as number[];
 
+                if (validValues.length === 0) return; // Cannot impute if all are missing
+
+                if (config.missingValueStrategy === 'mean') {
+                    fillValue = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                } else if (config.missingValueStrategy === 'median') {
+                    const sorted = [...validValues].sort((a, b) => a - b);
+                    const mid = Math.floor(sorted.length / 2);
+                    fillValue = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+                }
+                
+                if (fillValue !== undefined) {
+                    data.forEach(row => {
+                        if (row[colIndex] === '') {
+                            row[colIndex] = fillValue!.toFixed(2);
+                        }
+                    });
+                } else if (config.missingValueStrategy === 'interpolate') {
+                     data.forEach((row, rowIndex) => {
+                        if (row[colIndex] === '') {
+                            let prevVal: number | null = null;
+                            let nextVal: number | null = null;
+                            // Find previous value
+                            for (let i = rowIndex - 1; i >= 0; i--) {
+                                if (data[i][colIndex] !== '') { prevVal = parseFloat(data[i][colIndex]); break; }
+                            }
+                            // Find next value
+                            for (let i = rowIndex + 1; i < data.length; i++) {
+                                if (data[i][colIndex] !== '') { nextVal = parseFloat(data[i][colIndex]); break; }
+                            }
+                            if (prevVal !== null && nextVal !== null) {
+                                row[colIndex] = ((prevVal + nextVal) / 2).toFixed(2);
+                            } else if (prevVal !== null) { // Extrapolate end
+                                row[colIndex] = prevVal.toFixed(2);
+                            }
+                        }
+                     });
+                }
+            });
+            logDetails.push(`Filled missing values using ${config.missingValueStrategy}.`);
+        }
+    }
+
+    // --- 3. HANDLE OUTLIERS ---
+    if (config.outlierStrategy !== 'none') {
+        header.forEach((_, colIndex) => {
+             if(originalData.columns[colIndex].dataType !== 'number') return;
+             const values = data.map(r => parseFloat(r[colIndex])).filter(v => !isNaN(v)).sort((a,b) => a-b);
+             if(values.length < 4) return;
+             
+             const q1 = values[Math.floor(values.length / 4)];
+             const q3 = values[Math.floor(values.length * 3 / 4)];
+             const iqr = q3 - q1;
+             const lowerBound = q1 - 1.5 * iqr;
+             const upperBound = q3 + 1.5 * iqr;
+
+             if(config.outlierStrategy === 'remove') {
+                 data = data.filter(row => {
+                     const val = parseFloat(row[colIndex]);
+                     return val >= lowerBound && val <= upperBound;
+                 });
+             } else if (config.outlierStrategy === 'cap') {
+                 data.forEach(row => {
+                     const val = parseFloat(row[colIndex]);
+                     if(val < lowerBound) row[colIndex] = lowerBound.toFixed(2);
+                     if(val > upperBound) row[colIndex] = upperBound.toFixed(2);
+                 });
+             }
+        });
+        logDetails.push(`Handled outliers using ${config.outlierStrategy} strategy.`);
+    }
+
+    // --- 4. SCALE DATA ---
+    if (config.scaleData) {
+        header.forEach((_, colIndex) => {
+            if (originalData.columns[colIndex].dataType !== 'number') return;
+            const values = data.map(r => parseFloat(r[colIndex])).filter(v => !isNaN(v));
+            if(values.length === 0) return;
+
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            
+            if (max === min) return; // Avoid division by zero
+
+            data.forEach(row => {
+                const val = parseFloat(row[colIndex]);
+                if (!isNaN(val)) {
+                    row[colIndex] = ((val - min) / (max - min)).toFixed(4);
+                }
+            });
+        });
+        logDetails.push('Scaled numeric data (Normalization).');
+    }
+    
+    const finalCsvData = [header.join(','), ...data.map(row => row.join(','))].join('\n');
     const finalAnalysis = analyzeCsv(finalCsvData, originalData.stats.fileName);
     setProcessedData(finalAnalysis);
     
-    // Store processed data for the next page
     sessionStorage.setItem('preprocessedData', JSON.stringify(finalAnalysis));
-    if (primaryKey) {
+     if (primaryKey) {
         sessionStorage.setItem('primaryKey', primaryKey);
     } else {
         sessionStorage.removeItem('primaryKey');
@@ -206,13 +331,13 @@ export default function PreprocessingClient() {
         addLog({
             user: user.name,
             action: 'Data Preparation',
-            details: logDetails.join(' ')
+            details: logDetails.length > 0 ? logDetails.join(' ') : "No processing steps selected."
         })
     }
     toast({
         variant: 'info',
         title: "Preprocessing Complete",
-        description: `Data processed successfully. You can now proceed to train/test split.`
+        description: `Data processed successfully. You can now proceed.`
     });
     
     setLoading(false);
