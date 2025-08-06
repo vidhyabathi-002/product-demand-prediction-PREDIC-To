@@ -12,9 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import type { PreprocessingData } from '../preprocessing/preprocessing-client';
-import { SplitSquareHorizontal, Database, Hash, CheckCircle, ArrowRight, Shuffle, Timer, Layers } from 'lucide-react';
+import { SplitSquareHorizontal, Database, Hash, CheckCircle, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Separator } from '../ui/separator';
 
 const StatCard = ({ title, value, icon: Icon, colorClass }: { title: string, value: number | string, icon: React.ElementType, colorClass?: string }) => (
@@ -71,8 +70,6 @@ export default function TrainTestClient() {
         setLoading(true);
         await new Promise(res => setTimeout(res, 1500)); // Simulate split process
         
-        // This is a simulation of the split process. In a real application,
-        // you would split the data and store the train/test sets.
         const splitConfig = {
             targetColumn,
             testSize,
@@ -172,34 +169,6 @@ export default function TrainTestClient() {
                         </div>
 
                         <Separator />
-                        
-                        <div>
-                            <Label className="text-base font-semibold">Splitting Method</Label>
-                            <p className="text-sm text-muted-foreground mb-4">Choose the method to split your data. 'Time-Based' is recommended for forecasting.</p>
-                             <RadioGroup value={splitMethod} onValueChange={(v) => setSplitMethod(v as SplitMethod)} className="grid grid-cols-1 md:grid-cols-3 gap-4" disabled={isSplit}>
-                                <div>
-                                    <RadioGroupItem value="random" id="random" className="peer sr-only" />
-                                    <Label htmlFor="random" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                                        <Shuffle className="mb-3 h-6 w-6" />
-                                        Random Split
-                                    </Label>
-                                </div>
-                                <div>
-                                    <RadioGroupItem value="stratified" id="stratified" className="peer sr-only" />
-                                    <Label htmlFor="stratified" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                                        <Layers className="mb-3 h-6 w-6" />
-                                        Stratified Split
-                                    </Label>
-                                </div>
-                                <div>
-                                    <RadioGroupItem value="time-based" id="time-based" className="peer sr-only" />
-                                    <Label htmlFor="time-based" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                                        <Timer className="mb-3 h-6 w-6" />
-                                        Time-Based Split
-                                    </Label>
-                                </div>
-                            </RadioGroup>
-                        </div>
                         
                          <div className="space-y-4">
                             <div className="flex justify-between items-center">
