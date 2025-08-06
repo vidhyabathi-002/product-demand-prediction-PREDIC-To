@@ -144,8 +144,8 @@ export default function TrainTestClient() {
                         <CardTitle>Split Configuration</CardTitle>
                         <CardDescription>Select a target variable, splitting method, and test size.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-8">
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6">
+                        <div className="space-y-6">
                             <div className="space-y-2">
                                 <Label htmlFor="target-column">Target Column (Prediction Variable)</Label>
                                 <Select onValueChange={setTargetColumn} value={targetColumn} disabled={isSplit}>
@@ -167,37 +167,44 @@ export default function TrainTestClient() {
                                 <p className="text-xs text-muted-foreground">Set seed for reproducible results (default: 42).</p>
                             </div>
                         </div>
-
-                        <Separator />
-                        
-                         <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <Label htmlFor="test-size" className="text-base font-semibold">Test Set Size</Label>
-                                <Badge variant="outline" className="font-mono text-lg">{testSize}%</Badge>
+                         <div className="space-y-6">
+                             <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <Label htmlFor="test-size">Test Set Size</Label>
+                                    <Badge variant="outline" className="font-mono">{testSize}%</Badge>
+                                </div>
+                                <Slider
+                                    id="test-size"
+                                    min={10}
+                                    max={50}
+                                    step={5}
+                                    value={[testSize]}
+                                    onValueChange={([value]) => setTestSize(value)}
+                                    disabled={isSplit}
+                                />
                             </div>
-                            <Slider
-                                id="test-size"
-                                min={10}
-                                max={50}
-                                step={5}
-                                value={[testSize]}
-                                onValueChange={([value]) => setTestSize(value)}
-                                disabled={isSplit}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Split Preview</Label>
-                            <div className="w-full bg-muted rounded-full h-6 flex overflow-hidden">
-                               <div style={{ width: `${100-testSize}%`}} className="bg-primary flex items-center justify-center text-xs font-medium text-primary-foreground transition-all duration-300">
-                                   Training Set ({trainingSize})
-                               </div>
-                               <div style={{ width: `${testSize}%`}} className="bg-blue-300 flex items-center justify-center text-xs font-medium text-blue-800 transition-all duration-300">
-                                   Test Set ({testingSize})
-                               </div>
+                            <div className="space-y-4 rounded-lg border p-4">
+                                <Label className="text-base font-semibold">Split Preview</Label>
+                                <div className="space-y-2">
+                                    <p className="text-sm">Training Set</p>
+                                    <div className="w-full bg-muted rounded-full h-6 flex items-center pr-2" >
+                                       <div style={{ width: `${100-testSize}%`}} className="bg-primary flex h-full items-center justify-end rounded-full text-xs font-medium text-primary-foreground transition-all duration-300 pr-2">
+                                           {trainingSize} samples
+                                       </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <p className="text-sm">Testing Set</p>
+                                     <div className="w-full bg-muted rounded-full h-6 flex items-center pr-2">
+                                        <div style={{ width: `${testSize}%`}} className="bg-blue-300 flex h-full items-center justify-end rounded-full text-xs font-medium text-blue-800 transition-all duration-300 pr-2">
+                                           {testingSize} samples
+                                       </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                         </div>
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="border-t pt-6">
                         <Button onClick={handleSplit} disabled={loading || isSplit}>
                             {loading ? 'Splitting...' : 'Split Dataset'}
                         </Button>
