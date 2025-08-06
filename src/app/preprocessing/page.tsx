@@ -8,7 +8,7 @@ import { Tips } from "@/components/preprocessing/tips";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Data Preprocessing",
+  title: "Data Preparation",
 };
 
 export default function PreprocessingPage() {

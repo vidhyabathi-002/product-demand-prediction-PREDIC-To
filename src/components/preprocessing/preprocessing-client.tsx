@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, TestTube2, DatabaseZap, ArrowRight } from 'lucide-react';
 import { DataOverview, type DataStats } from './data-overview';
 import { ColumnInformation, type ColumnInfo } from './column-information';
-import { PrimaryKeySelection } from './primary-key-selection';
 import { Configuration, type PreprocessingConfig } from './configuration';
 import { useRouter } from 'next/navigation';
 import { DataPreview } from './data-preview';
@@ -29,7 +28,6 @@ export default function PreprocessingClient() {
   const [fileName, setFileName] = useState('');
   const [originalData, setOriginalData] = useState<PreprocessingData | null>(null);
   const [processedData, setProcessedData] = useState<PreprocessingData | null>(null);
-  const [primaryKey, setPrimaryKey] = useState<string | null>(null);
   const [isProcessed, setIsProcessed] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -98,7 +96,6 @@ export default function PreprocessingClient() {
           }
       });
       
-       // Check for duplicate rows
       const rowSet = new Set(rows);
       stats.duplicates = rows.length - rowSet.size;
 
@@ -112,15 +109,14 @@ export default function PreprocessingClient() {
       if (selectedFile.type === 'text/csv') {
         setFile(selectedFile);
         setFileName(selectedFile.name);
-        setPrimaryKey(null); // Reset primary key on new file
         
         const reader = new FileReader();
         reader.onload = async (e) => {
             const text = e.target?.result as string;
             const analysis = analyzeCsv(text, selectedFile.name);
             setOriginalData(analysis);
-            setProcessedData(analysis); // Initially, processed is same as original
-            setIsProcessed(false); // Reset processed state
+            setProcessedData(analysis); 
+            setIsProcessed(false); 
         };
         reader.readAsText(selectedFile);
         toast({
@@ -146,7 +142,6 @@ export default function PreprocessingClient() {
         const name = "sample-sales-data.csv";
         setFile(new File([text], name, { type: "text/csv" }));
         setFileName(name);
-        setPrimaryKey(null);
         const analysis = analyzeCsv(text, name);
         setOriginalData(analysis);
         setProcessedData(analysis);
@@ -164,16 +159,16 @@ export default function PreprocessingClient() {
     }
   }
 
-  const handleStartPreprocessing = async (config: PreprocessingConfig) => {
+  const handleProcessAndSplit = async (config: PreprocessingConfig) => {
     if (!originalData) return;
 
     setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
 
     let finalCsvData = originalData.csvData;
     let logDetails: string[] = [];
-
-    // Simulate Missing Value Handling
+    
+    // Simulate all the preprocessing steps
     if (config.missingValueStrategy === 'drop') {
       const lines = originalData.csvData.trim().split('\n');
       const header = lines[0];
@@ -185,35 +180,36 @@ export default function PreprocessingClient() {
       finalCsvData = [header, ...cleanedRows].join('\n');
       logDetails.push('Dropped rows with missing values.');
     } else {
-        // Simulate other strategies
-        logDetails.push(`Applied '${config.missingValueStrategy}' strategy for missing values.`);
+        logDetails.push(`Simulated '${config.missingValueStrategy}' for missing values.`);
     }
 
-    // Simulate Advanced Preprocessing
-    if (config.scaleData) {
-        logDetails.push('Applied data scaling (Normalization).');
-    }
-    if (config.featureEngineering) {
-        logDetails.push('Applied feature engineering.');
-    }
+    if(config.removeDuplicates) logDetails.push('Simulated duplicate removal.');
+    if(config.outlierStrategy !== 'none') logDetails.push(`Simulated outlier handling with '${config.outlierStrategy}'.`);
+    if(config.scaleData) logDetails.push('Simulated data scaling (Normalization).');
+    if(config.encodingStrategy !== 'none') logDetails.push(`Simulated '${config.encodingStrategy}' encoding.`);
+    if(config.featureEngineering) logDetails.push('Simulated feature engineering.');
 
 
     const finalAnalysis = analyzeCsv(finalCsvData, originalData.stats.fileName);
     setProcessedData(finalAnalysis);
+    
+    // Store processed data and split config for the next page
     sessionStorage.setItem('preprocessedData', JSON.stringify(finalAnalysis));
+    sessionStorage.setItem('splitConfig', JSON.stringify(config));
+
     setIsProcessed(true);
 
     if (user) {
         addLog({
             user: user.name,
-            action: 'Data Preprocessing',
-            details: logDetails.join(' ')
+            action: 'Data Preparation',
+            details: logDetails.join(' ') + ` Split data with ${config.testSize}% test size.`
         })
     }
     toast({
         variant: 'info',
-        title: "Preprocessing Complete",
-        description: `Data processed successfully. You can now proceed to the next step.`
+        title: "Pipeline Complete",
+        description: `Data processed and split successfully. You can now proceed to forecasting.`
     });
     
     setLoading(false);
@@ -229,7 +225,7 @@ export default function PreprocessingClient() {
                 <DatabaseZap className="w-6 h-6 text-primary" />
             </div>
             <div>
-                 <h1 className="text-3xl font-bold tracking-tight">Data Preprocessing</h1>
+                 <h1 className="text-3xl font-bold tracking-tight">Data Preparation</h1>
                 <p className="text-muted-foreground">
                 Clean, transform, and prepare your data for machine learning.
                 </p>
@@ -261,12 +257,8 @@ export default function PreprocessingClient() {
             <div className='space-y-6'>
                 <DataOverview stats={displayData.stats} />
                 <ColumnInformation columns={displayData.columns} />
-                <PrimaryKeySelection 
-                  columns={displayData.columns.map(c => c.name)} 
-                  onSelect={setPrimaryKey}
-                />
                 
-                <Configuration onStart={handleStartPreprocessing} isLoading={loading} />
+                <Configuration onStart={handleProcessAndSplit} isLoading={loading} preprocessedData={displayData} />
 
                 {isProcessed && processedData && (
                     <>
@@ -275,12 +267,12 @@ export default function PreprocessingClient() {
                         <CardHeader>
                             <CardTitle>Ready for Next Step</CardTitle>
                             <CardDescription>
-                                Your data has been successfully preprocessed. You can now move on to the train/test split stage.
+                                Your data has been successfully prepared and split. You can now move on to forecasting.
                             </CardDescription>
                         </CardHeader>
                         <CardFooter>
-                            <Button onClick={() => router.push('/train-test-split')}>
-                                Proceed to Train/Test Split
+                            <Button onClick={() => router.push('/external-data')}>
+                                Proceed to Forecasting
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </CardFooter>
