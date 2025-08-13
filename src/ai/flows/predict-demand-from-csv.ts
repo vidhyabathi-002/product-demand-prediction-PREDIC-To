@@ -75,11 +75,9 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
   const trainData = historicalData.slice(0, historicalData.length - testSize);
   const testData = historicalData.slice(historicalData.length - testSize);
   
-  // 3. ENHANCED MODEL TRAINING (using the training set)
-  // Calculate moving averages and trend analysis
+  // 3. SIMULATED MODEL TRAINING (using the training set)
+  // We'll simulate training by calculating a simple linear trend from the training data.
   const nTrain = trainData.length;
-  
-  // Calculate trend using least squares regression
   const sumX = trainData.reduce((acc, _, i) => acc + i, 0);
   const sumY = trainData.reduce((acc, d) => acc + d.sales, 0);
   const sumXY = trainData.reduce((acc, d, i) => acc + i * d.sales, 0);
@@ -87,28 +85,6 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
   
   const slope = (nTrain * sumXY - sumX * sumY) / (nTrain * sumXX - sumX * sumX);
   const intercept = (sumY - slope * sumX) / nTrain;
-  
-  // Calculate moving average for baseline
-  const windowSize = Math.min(3, Math.floor(nTrain / 2));
-  const movingAvg = trainData.slice(-windowSize).reduce((acc, d) => acc + d.sales, 0) / windowSize;
-  
-  // Detect seasonality patterns
-  const monthlyAverages = new Map<string, number[]>();
-  trainData.forEach(d => {
-    const monthKey = d.month.slice(0, 3).toLowerCase();
-    if (!monthlyAverages.has(monthKey)) {
-      monthlyAverages.set(monthKey, []);
-    }
-    monthlyAverages.get(monthKey)!.push(d.sales);
-  });
-  
-  // Calculate seasonal factors
-  const seasonalFactors = new Map<string, number>();
-  const overallAvg = trainData.reduce((acc, d) => acc + d.sales, 0) / trainData.length;
-  monthlyAverages.forEach((values, month) => {
-    const monthAvg = values.reduce((acc, v) => acc + v, 0) / values.length;
-    seasonalFactors.set(month, monthAvg / overallAvg);
-  });
 
   // Model-specific adjustments
   let modelNoiseFactor = 0.1;
@@ -121,26 +97,13 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
       case "ARIMA": default: confidence = "Medium"; modelNoiseFactor = 0.1; break;
   }
   
-  // 4. IMPROVED TESTING & METRICS CALCULATION
-  const predictionsOnTest = testData.map((data, i) => {
-      const timeStep = nTrain + i;
-      
-      // Base trend prediction
-      let prediction = slope * timeStep + intercept;
-      
-      // Apply seasonal adjustment if available
-      const monthKey = data.month.slice(0, 3).toLowerCase();
-      const seasonalFactor = seasonalFactors.get(monthKey) || 1;
-      prediction *= seasonalFactor;
-      
-      // Apply moving average smoothing (weighted 70% trend, 30% moving avg)
-      prediction = 0.7 * prediction + 0.3 * movingAvg;
-      
-      // Add small controlled variance based on model type
-      const variance = prediction * modelNoiseFactor * 0.5; // Reduced noise
-      const controlledNoise = (Math.random() - 0.5) * variance;
-      
-      return Math.max(0, Math.round(prediction + controlledNoise));
+  // 4. SIMULATED TESTING & METRICS CALCULATION
+  const predictionsOnTest = testData.map((_, i) => {
+      const timeStep = nTrain + i; // Continue the time series from the training data
+      const prediction = slope * timeStep + intercept;
+      // Add model-specific noise to make it more realistic
+      const noise = (Math.random() - 0.5) * prediction * modelNoiseFactor;
+      return Math.max(0, prediction + noise);
   });
 
   const actualsOnTest = testData.map(d => d.sales);
@@ -155,105 +118,22 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
   const residualSumOfSquares = errors.reduce((acc, e) => acc + e * e, 0);
   const rSquared = 1 - (residualSumOfSquares / totalSumOfSquares);
 
-  // Calculate more realistic accuracy and F1 score
-  const meanAbsolutePercentageError = absErrors.reduce((acc, e, i) => {
-    return acc + (actualsOnTest[i] > 0 ? e / actualsOnTest[i] : 0);
-  }, 0) / testSize;
-  
-  // Base accuracy calculation with model-specific adjustments
-  let accuracy = Math.max(0.7, 1 - meanAbsolutePercentageError);
-  let f1Score = accuracy * 0.95; // F1 typically slightly lower than accuracy
-  
-  // Apply model-specific performance characteristics
-  switch(model) {
-    case "XGBoost":
-      accuracy = Math.min(0.96, accuracy * 1.08);
-      f1Score = Math.min(0.95, f1Score * 1.08);
-      break;
-    case "Random Forest":
-      accuracy = Math.min(0.94, accuracy * 1.06);
-      f1Score = Math.min(0.93, f1Score * 1.06);
-      break;
-    case "Prophet":
-      accuracy = Math.min(0.91, accuracy * 1.04);
-      f1Score = Math.min(0.89, f1Score * 1.04);
-      break;
-    case "LSTM":
-      accuracy = Math.min(0.88, accuracy * 1.02);
-      f1Score = Math.min(0.86, f1Score * 1.02);
-      break;
-    case "ARIMA":
-    default:
-      accuracy = Math.min(0.85, accuracy);
-      f1Score = Math.min(0.82, f1Score);
-  }
+  // Simulate accuracy and F1 score based on error percentage
+  const meanAbsolutePercentageError = (absErrors.reduce((acc, e, i) => acc + e / actualsOnTest[i], 0) / testSize);
+  const accuracy = 1 - meanAbsolutePercentageError;
+  const f1Score = accuracy * (1 - (modelNoiseFactor / 2)); // F1 is often slightly lower than accuracy
 
-  // 5. ENHANCED FINAL PREDICTION (using all historical data)
-  // Recalculate trend using all data
-  const n = historicalData.length;
-  const fullSumX = historicalData.reduce((acc, _, i) => acc + i, 0);
-  const fullSumY = historicalData.reduce((acc, d) => acc + d.sales, 0);
-  const fullSumXY = historicalData.reduce((acc, d, i) => acc + i * d.sales, 0);
-  const fullSumXX = historicalData.reduce((acc, _, i) => acc + i * i, 0);
-  
-  const fullSlope = (n * fullSumXY - fullSumX * fullSumY) / (n * fullSumXX - fullSumX * fullSumX);
-  const fullIntercept = (fullSumY - fullSlope * fullSumX) / n;
-  
-  // Recalculate seasonal factors with all data
-  const fullMonthlyAverages = new Map<string, number[]>();
-  historicalData.forEach(d => {
-    const monthKey = d.month.slice(0, 3).toLowerCase();
-    if (!fullMonthlyAverages.has(monthKey)) {
-      fullMonthlyAverages.set(monthKey, []);
-    }
-    fullMonthlyAverages.get(monthKey)!.push(d.sales);
-  });
-  
-  const fullSeasonalFactors = new Map<string, number>();
-  const fullOverallAvg = historicalData.reduce((acc, d) => acc + d.sales, 0) / historicalData.length;
-  fullMonthlyAverages.forEach((values, month) => {
-    const monthAvg = values.reduce((acc, v) => acc + v, 0) / values.length;
-    fullSeasonalFactors.set(month, monthAvg / fullOverallAvg);
-  });
-  
-  // Get recent trend (last 3 months)
-  const recentData = historicalData.slice(-3);
-  const recentTrend = recentData.length > 1 ? 
-    (recentData[recentData.length - 1].sales - recentData[0].sales) / (recentData.length - 1) : 0;
+  // 5. FINAL PREDICTION (using all historical data)
+  const fullTrendSlope = historicalData.length > 1 ? (historicalData[historicalData.length - 1].sales - historicalData[0].sales) / (historicalData.length - 1) : 0;
+  const avgSales = historicalData.reduce((acc, d) => acc + d.sales, 0) / historicalData.length;
   
   const forecastMonths = ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const forecastData = forecastMonths.map((month, i) => {
-    const timeStep = n + i;
-    
-    // Base trend prediction
-    let prediction = fullSlope * timeStep + fullIntercept;
-    
-    // Apply seasonal factor
-    const monthKey = month.toLowerCase();
-    const seasonalFactor = fullSeasonalFactors.get(monthKey) || 1;
-    prediction *= seasonalFactor;
-    
-    // Incorporate recent trend (weighted 80% long-term, 20% recent)
-    const recentInfluence = historicalData[historicalData.length - 1].sales + recentTrend * (i + 1);
-    prediction = 0.8 * prediction + 0.2 * recentInfluence;
-    
-    // Add growth/decline factor based on model sophistication
-    let growthFactor = 1;
-    switch(model) {
-      case "XGBoost":
-      case "Random Forest":
-        growthFactor = 1 + (fullSlope > 0 ? 0.02 : -0.01) * (i + 1); // Better models capture growth
-        break;
-      case "Prophet":
-        growthFactor = 1 + (fullSlope > 0 ? 0.015 : -0.005) * (i + 1);
-        break;
-      default:
-        growthFactor = 1 + (fullSlope > 0 ? 0.01 : -0.005) * (i + 1);
-    }
-    
-    prediction *= growthFactor;
-    
-    return { month, predicted: Math.max(0, Math.round(prediction)) };
+    const trendValue = historicalData[historicalData.length-1].sales + fullTrendSlope * (i + 1);
+    const seasonalValue = avgSales * 0.15 * Math.sin((Math.PI * i) / (forecastMonths.length -1)); // Add some seasonality
+    const randomNoise = (Math.random() - 0.5) * (avgSales * modelNoiseFactor);
+    const prediction = Math.max(0, Math.round(trendValue + seasonalValue + randomNoise));
+    return { month, predicted: prediction };
   });
 
   const chartData: PredictDemandFromCsvOutput['chartData'] = [
