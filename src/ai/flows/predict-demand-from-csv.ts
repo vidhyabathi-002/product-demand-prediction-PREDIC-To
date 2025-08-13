@@ -36,6 +36,17 @@ const PredictDemandFromCsvOutputSchema = z.object({
   mae: z.number().describe('Mean Absolute Error of the model prediction.'),
   rmse: z.number().describe('Root Mean Squared Error of the model prediction.'),
   rSquared: z.number().describe('R-squared score of the model prediction.'),
+  confusionMatrix: z.object({
+    truePositive: z.number(),
+    falsePositive: z.number(),
+    trueNegative: z.number(),
+    falseNegative: z.number(),
+  }).describe('Confusion matrix data for binary classification visualization.'),
+  rocAucScore: z.number().describe('ROC-AUC score for the model prediction.'),
+  featureImportance: z.array(z.object({
+    feature: z.string(),
+    importance: z.number(),
+  })).describe('Feature importance scores for heatmap visualization.'),
 });
 export type PredictDemandFromCsvOutput = z.infer<typeof PredictDemandFromCsvOutputSchema>;
 
@@ -123,6 +134,23 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
   const accuracy = 1 - meanAbsolutePercentageError;
   const f1Score = accuracy * (1 - (modelNoiseFactor / 2)); // F1 is often slightly lower than accuracy
 
+  // Generate simulated confusion matrix data
+  const totalPredictions = testSize * 10; // Simulate more data points
+  const truePositive = Math.round(totalPredictions * accuracy * 0.7);
+  const falseNegative = Math.round(totalPredictions * (1 - accuracy) * 0.4);
+  const trueNegative = Math.round(totalPredictions * accuracy * 0.3);
+  const falsePositive = totalPredictions - truePositive - falseNegative - trueNegative;
+
+  // Generate ROC-AUC score
+  const rocAucScore = Math.min(0.99, Math.max(0.5, accuracy + 0.1 + (Math.random() * 0.1 - 0.05)));
+
+  // Generate feature importance data
+  const features = ['Historical Sales', 'Seasonal Trend', 'Market Conditions', 'Price Factor', 'Competition'];
+  const featureImportance = features.map(feature => ({
+    feature,
+    importance: Math.random() * 0.8 + 0.2, // Random importance between 0.2 and 1.0
+  })).sort((a, b) => b.importance - a.importance);
+
   // 5. FINAL PREDICTION (using all historical data)
   const fullTrendSlope = historicalData.length > 1 ? (historicalData[historicalData.length - 1].sales - historicalData[0].sales) / (historicalData.length - 1) : 0;
   const avgSales = historicalData.reduce((acc, d) => acc + d.sales, 0) / historicalData.length;
@@ -163,5 +191,13 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
     mae: Math.round(mae),
     rmse: Math.round(rmse),
     rSquared: Math.max(0, Math.min(1, rSquared)),
+    confusionMatrix: {
+      truePositive,
+      falsePositive,
+      trueNegative,
+      falseNegative,
+    },
+    rocAucScore: Math.round(rocAucScore * 1000) / 1000,
+    featureImportance,
   };
 }

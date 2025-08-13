@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,6 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { predictDemandFromCsv, type PredictDemandFromCsvOutput, type ModelType } from '@/ai/flows/predict-demand-from-csv';
 import { Skeleton } from '../ui/skeleton';
 import { PredictionChart } from './prediction-chart';
+import { ConfusionMatrix } from '@/components/external-data/confusion-matrix';
+import { ROCCurve } from '@/components/external-data/roc-curve';
+import { FeatureHeatmap } from '@/components/external-data/feature-heatmap';
 import { useRouter } from 'next/navigation';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
@@ -85,9 +87,9 @@ export default function UploadClient() {
 
     try {
         const predictionResult = await predictDemandFromCsv({ csvData: csvString, model: selectedModel });
-        
+
         setPrediction(predictionResult);
-        
+
         sessionStorage.setItem('predictionReport', JSON.stringify(predictionResult));
         addNotification({
             title: 'Report Generated',
@@ -229,6 +231,17 @@ export default function UploadClient() {
                   <div className="lg:col-span-3">
                      {prediction.chartData && <PredictionChart data={prediction.chartData} />}
                   </div>
+                  {/* Placeholder for new visualization components */}
+                  <div className="lg:col-span-2">
+                    {prediction.confusionMatrixData && <ConfusionMatrix data={prediction.confusionMatrixData} />}
+                  </div>
+                  <div className="lg:col-span-2">
+                    {prediction.rocCurveData && <ROCCurve data={prediction.rocCurveData} />}
+                  </div>
+                  <div className="lg:col-span-2">
+                    {prediction.featureImportance && <FeatureHeatmap data={prediction.featureImportance} />}
+                  </div>
+
                   <div className="lg:col-span-3 flex flex-col gap-6">
                     <Card>
                       <CardHeader>
