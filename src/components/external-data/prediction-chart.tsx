@@ -36,10 +36,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const historical = payload.find((p: any) => p.dataKey === 'historical')?.value || 0;
     const predicted = payload.find((p: any) => p.dataKey === 'predicted')?.value || 0;
-    
+
     // Calculate percentage change from previous period if possible
     const currentValue = predicted > 0 ? predicted : historical;
-    
+
     return (
       <div className="bg-background border rounded-lg p-3 shadow-lg">
         <p className="font-medium">{label}</p>
@@ -63,15 +63,15 @@ export function PredictionChart({ data }: { data: ChartData }) {
   // Calculate trend metrics
   const historicalData = data.filter(d => d.historical > 0);
   const predictedData = data.filter(d => d.predicted > 0);
-  
+
   const lastHistorical = historicalData[historicalData.length - 1]?.historical || 0;
   const firstPredicted = predictedData[0]?.predicted || 0;
   const lastPredicted = predictedData[predictedData.length - 1]?.predicted || 0;
-  
+
   // Calculate percentage change from last historical to predictions
   const overallChange = lastHistorical > 0 ? ((lastPredicted - lastHistorical) / lastHistorical) * 100 : 0;
   const predictionGrowth = firstPredicted > 0 ? ((lastPredicted - firstPredicted) / firstPredicted) * 100 : 0;
-  
+
   const isIncreasing = overallChange > 0;
   const avgHistorical = historicalData.length > 0 ? 
     historicalData.reduce((sum, d) => sum + d.historical, 0) / historicalData.length : 0;
@@ -121,10 +121,10 @@ export function PredictionChart({ data }: { data: ChartData }) {
                 <span className="text-sm font-medium">Overall Trend</span>
               </div>
               <p className={`text-lg font-bold ${isIncreasing ? 'text-green-600' : 'text-red-600'}`}>
-                {isIncreasing ? '+' : ''}{overallChange.toFixed(1)}%
+                {isIncreasing ? '+' : ''}{(overallChange || 0).toFixed(1)}%
               </p>
             </div>
-            
+
             <div className="p-3 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-muted-foreground">Avg Historical</span>
@@ -133,7 +133,7 @@ export function PredictionChart({ data }: { data: ChartData }) {
                 {Math.round(avgHistorical).toLocaleString()}
               </p>
             </div>
-            
+
             <div className="p-3 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-primary">Peak Prediction</span>
