@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2, Target, Award, Shield } from 'lucide-react';
+import { BarChart, CheckCircle, AlertTriangle, TrendingUp, TrendingDown, Clock, FileText, Cpu, TestTube2, Target, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -53,9 +53,6 @@ export default function UploadClient() {
   const { addNotification } = useNotification();
   const { addLog } = useActivityLog();
   const { user } = useUser();
-  const [showResults, setShowResults] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
 
   useEffect(() => {
     const storedData = sessionStorage.getItem('preprocessedData');
@@ -86,19 +83,13 @@ export default function UploadClient() {
 
     setLoading(true);
     setPrediction(null);
-    setShowResults(false); // Reset results visibility
-    setError(null); // Reset error state
     sessionStorage.removeItem('predictionReport');
 
     try {
         const predictionResult = await predictDemandFromCsv({ csvData: csvString, model: selectedModel });
 
-        if (!predictionResult || typeof predictionResult !== 'object') {
-            throw new Error('Invalid prediction result received');
-        }
-
         setPrediction(predictionResult);
-        setShowResults(true); // Show results section
+
         sessionStorage.setItem('predictionReport', JSON.stringify(predictionResult));
         addNotification({
             title: 'Report Generated',
@@ -140,11 +131,10 @@ export default function UploadClient() {
 
     } catch (error) {
         console.error('Prediction failed:', error);
-        setError('Failed to generate prediction. Please check your data format and ensure it has the required columns (month, sales).');
         toast({
-            variant: 'destructive',
-            title: 'Prediction Failed',
-            description: error instanceof Error ? error.message : 'An unknown error occurred during prediction.',
+        variant: 'destructive',
+        title: 'Prediction Failed',
+        description: (error as Error).message || 'Could not get a prediction from the model.',
         });
     } finally {
         setLoading(false);
@@ -221,7 +211,7 @@ export default function UploadClient() {
         <div className='space-y-6'>
             {loading && <PredictionSkeleton />}
 
-            {!loading && !prediction && !error && (
+            {!loading && !prediction && (
                 <Card className="flex flex-col items-center justify-center h-full min-h-[400px] border-dashed">
                     <div className="text-center p-8">
                         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
@@ -235,39 +225,21 @@ export default function UploadClient() {
                 </Card>
             )}
 
-            {error && (
-                <Card className="flex flex-col items-center justify-center h-full min-h-[400px] border-dashed border-red-500">
-                    <div className="text-center p-8">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 mb-4">
-                            <AlertTriangle className="h-8 w-8 text-red-500" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-red-500">Prediction Error</h3>
-                        <p className="text-muted-foreground mt-2">{error}</p>
-                    </div>
-                </Card>
-            )}
-
-            {showResults && prediction && (
+            {prediction && (
                 <>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="lg:col-span-3">
                      {prediction.chartData && <PredictionChart data={prediction.chartData} />}
                   </div>
-                  {/* Model Visualization Components */}
-                  <div className="lg:col-span-1">
-                    <ConfusionMatrix data={prediction.confusionMatrix} />
+                  {/* Placeholder for new visualization components */}
+                  <div className="lg:col-span-2">
+                    {prediction.confusionMatrixData && <ConfusionMatrix data={prediction.confusionMatrixData} />}
                   </div>
-                  <div className="lg:col-span-1">
-                    <ROCCurve
-                      data={{
-                        rocAucScore: prediction.rocAucScore,
-                        fpr: [0, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0],
-                        tpr: [0, 0.15, 0.35, 0.55, 0.75, 0.9, 1.0]
-                      }}
-                    />
+                  <div className="lg:col-span-2">
+                    {prediction.rocCurveData && <ROCCurve data={prediction.rocCurveData} />}
                   </div>
-                  <div className="lg:col-span-1">
-                    <FeatureHeatmap data={prediction.featureImportance} />
+                  <div className="lg:col-span-2">
+                    {prediction.featureImportance && <FeatureHeatmap data={prediction.featureImportance} />}
                   </div>
 
                   <div className="lg:col-span-3 flex flex-col gap-6">
@@ -279,7 +251,7 @@ export default function UploadClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-sm text-muted-foreground">{prediction.summary || 'No summary available'}</p>
+                        <p className="text-sm text-muted-foreground">{prediction.summary}</p>
                       </CardContent>
                     </Card>
 
@@ -309,28 +281,28 @@ export default function UploadClient() {
                             )}
                           <span className="text-sm">Sales Trend</span>
                         </div>
-                        <p className="text-2xl font-bold">{prediction.salesTrend || 'Unknown'}</p>
+                        <p className="text-2xl font-bold">{prediction.salesTrend}</p>
                       </Card>
                        <Card className="p-4">
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock className="h-5 w-5 text-primary" />
                             <span className="text-sm">Peak Demand</span>
                           </div>
-                        <p className="text-2xl font-bold">{prediction.peakDemandPeriod || 'N/A'}</p>
+                        <p className="text-2xl font-bold">{prediction.peakDemandPeriod}</p>
                       </Card>
                       <Card className="p-4">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <CheckCircle className="h-5 w-5 text-green-500" />
                           <span className="text-sm">Predicted Units</span>
                         </div>
-                        <p className="text-2xl font-bold">{prediction.predictedUnits?.toLocaleString() || '0'}</p>
+                        <p className="text-2xl font-bold">{prediction.predictedUnits.toLocaleString()}</p>
                       </Card>
                       <Card className="p-4">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Shield className="h-5 w-5 text-blue-500" />
-                          <span className="text-sm">Confidence</span>
-                        </div>
-                        <p className="text-2xl font-bold">{prediction.confidence || 'Unknown'}</p>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <AlertTriangle className="h-5 w-5 text-amber-500" />
+                            <span className="text-sm">Confidence</span>
+                          </div>
+                        <p className="text-2xl font-bold">{prediction.confidence}</p>
                       </Card>
                     </div>
                   </div>
