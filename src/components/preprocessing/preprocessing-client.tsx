@@ -292,7 +292,69 @@ export default function PreprocessingClient() {
         logDetails.push(`Handled outliers using ${config.outlierStrategy} strategy.`);
     }
 
-    // --- 4. SCALE DATA ---
+    // --- 4. CATEGORICAL ENCODING ---
+    if (config.encodingStrategy !== 'none') {
+        const categoricalColumns = header.map((_, colIndex) => 
+            originalData.columns[colIndex].dataType === 'string' ? colIndex : -1
+        ).filter(idx => idx !== -1);
+
+        if (categoricalColumns.length > 0) {
+            if (config.encodingStrategy === 'label') {
+                // Label Encoding: Assign numeric labels to categories
+                categoricalColumns.forEach(colIndex => {
+                    const uniqueValues = [...new Set(data.map(row => row[colIndex]))].filter(v => v !== '');
+                    const labelMap: { [key: string]: number } = {};
+                    
+                    uniqueValues.forEach((value, index) => {
+                        labelMap[value] = index;
+                    });
+
+                    data.forEach(row => {
+                        if (row[colIndex] !== '' && labelMap[row[colIndex]] !== undefined) {
+                            row[colIndex] = labelMap[row[colIndex]].toString();
+                        }
+                    });
+                });
+                logDetails.push('Applied Label Encoding to categorical columns.');
+
+            } else if (config.encodingStrategy === 'one-hot') {
+                // One-Hot Encoding: Create binary columns for each category
+                const newHeader = [...header];
+                const newData = data.map(row => [...row]);
+
+                categoricalColumns.forEach(colIndex => {
+                    const uniqueValues = [...new Set(data.map(row => row[colIndex]))].filter(v => v !== '');
+                    const originalColumnName = header[colIndex];
+                    
+                    // Add new columns for each unique value
+                    uniqueValues.forEach(value => {
+                        newHeader.push(`${originalColumnName}_${value}`);
+                    });
+
+                    // Update each row with one-hot encoded values
+                    newData.forEach(row => {
+                        const currentValue = row[colIndex];
+                        uniqueValues.forEach(value => {
+                            row.push(currentValue === value ? '1' : '0');
+                        });
+                    });
+                });
+
+                // Remove original categorical columns (from right to left to maintain indices)
+                categoricalColumns.sort((a, b) => b - a).forEach(colIndex => {
+                    newHeader.splice(colIndex, 1);
+                    newData.forEach(row => row.splice(colIndex, 1));
+                });
+
+                // Update header and data
+                header.splice(0, header.length, ...newHeader);
+                data = newData;
+                logDetails.push('Applied One-Hot Encoding to categorical columns.');
+            }
+        }
+    }
+
+    // --- 5. SCALE DATA ---
     if (config.scaleData) {
         header.forEach((_, colIndex) => {
             if (originalData.columns[colIndex].dataType !== 'number') return;
