@@ -77,7 +77,13 @@ export async function predictDemandFromCsv(input: PredictDemandFromCsvInput): Pr
   }).filter(d => d !== null && d.sales > 0) as { month: string, sales: number }[];
 
   if (historicalData.length < 4) { // Need at least 4 data points for a meaningful split
-    throw new Error("Not enough historical data. Please provide a CSV with at least 4 months of sales.");
+    throw new Error("Not enough historical data. Please provide a CSV with at least 4 months of sales data.");
+  }
+
+  // Validate that we have actual sales data
+  const totalSales = historicalData.reduce((sum, d) => sum + d.sales, 0);
+  if (totalSales === 0) {
+    throw new Error("No valid sales data found. Please ensure your CSV has numeric sales values.");
   }
 
   // 2. TRAIN/TEST SPLIT
